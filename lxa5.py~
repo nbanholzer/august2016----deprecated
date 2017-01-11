@@ -40,23 +40,23 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=10000
+numberofwords 	=300000
 
-NumberOfCorrections = 10
+NumberOfCorrections = 100
   
 language="english"
 #language="english-encarta"
 #language="german"
 #language="swahili"
-#language="french"
-#language="latin"
+language="french"
+language="latin"
 
 #shortfilename = "english-encarta"
 #shortfilename = "german"
 shortfilename="browncorpus"
 #shortfilename="swahili"
-#shortfilename = "encarta_french_UTF8"
-#shortfilename="bible"
+shortfilename = "encarta_french_UTF8"
+shortfilename="latin"
 
 print ("language" , language)
 #-----------------------------------------------------------------------#
@@ -86,9 +86,8 @@ outfile_SigTransforms_name 		= outfolder + shortfilename + "_sigtransforms.txt"
 outfile_SigExtensions_name 		= outfolder + shortfilename + "_sigextensions.txt"
 outfile_signature_exemplar_name = outfolder + shortfilename + "_signature_exemplars.txt"
 outfile_stemtowords_name 		= outfolder + shortfilename + "_stemtowords.txt"
-outfile_stemtowords_2_name              = outfolder + shortfilename + "_stemtowords_2.txt" # limited to those suffixes which are among the K-most frequent, for data visualization.
-outfile_FSA_name			= outfolder + shortfilename + "_FSA.txt"
-outfile_log_name 			= outfolder + shortfilename + "_log.txt"
+outfile_FSA_name				= outfolder + shortfilename + "_FSA.txt"
+outfile_log_name 				= outfolder + shortfilename + "_log.txt"
 outfile_WordToSig_name			= outfolder + shortfilename + "_WordToSig.txt"
 outfile_wordparses_name 		= outfolder + shortfilename + "_WordParses.txt"
 outfile_wordlist_name 			= outfolder + shortfilename + "_WordList.txt"
@@ -133,7 +132,6 @@ outfile_SigExemplars 	= open (outfile_signature_exemplar_name,"w")
 outfile_WordToSig		= open (outfile_WordToSig_name,"w")
 outfile_SigTransforms   = open (outfile_SigTransforms_name,"w")
 outfile_StemToWords   	= open (outfile_stemtowords_name,"w") 
-outfile_StemToWords2   	= open (outfile_stemtowords_2_name,"w") 
 outfile_WordParses   	= open (outfile_wordparses_name,"w") 
 outfile_WordList   		= open (outfile_wordlist_name,"w") 
 outfile_SigExtensions   = open (outfile_SigExtensions_name,"w") 
@@ -240,7 +238,7 @@ if True:
  
 if True:
 	print "3. Printing signatures."
-	printSignatures(Lexicon, lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_StemToWords2, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
+	printSignatures(Lexicon, lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
  
 if False:
 	print "4. Printing signature transforms for each word."

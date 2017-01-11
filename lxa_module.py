@@ -976,7 +976,7 @@ def AverageCountOfTopStems(howmany, sig, Signatures, StemCounts):
 
 
 # ----------------------------------------------------------------------------------------------------------------------------#
-def printSignatures(Lexicon, lxalogfile, outfile_signatures, outfile_wordstosigs, outfile_stemtowords, outfile_SigExtensions, outfile_suffixes, encoding,
+def printSignatures(Lexicon, lxalogfile, outfile_signatures, outfile_wordstosigs, outfile_stemtowords, outfile_stemtowords2, outfile_SigExtensions, outfile_suffixes, encoding,
 					FindSuffixesFlag):
 	# ----------------------------------------------------------------------------------------------------------------------------#
 
@@ -1202,11 +1202,21 @@ def printSignatures(Lexicon, lxalogfile, outfile_signatures, outfile_wordstosigs
 				print >> outfile_wordstosigs, sig + " " * (ColumnWidth - len(sig)),
 			print >> outfile_wordstosigs
 
+ 
+	print >>outfile_suffixes,  "--------------------------------------------------------------"
+	print >>outfile_suffixes , "        Suffixes "
+	print >>outfile_suffixes,  "--------------------------------------------------------------"
+	print "  Printing suffixes."
+	suffixlist = list(Lexicon.Suffixes.keys())
+	suffixlist.sort(key=lambda  suffix:Lexicon.Suffixes[suffix], reverse=True)
+	for suffix in suffixlist:
+		print >>outfile_suffixes,"{:8s}{:9,d}".format(suffix, Lexicon.Suffixes[suffix])
+
+
 	stems = Lexicon.StemToWord.keys()
 	stems.sort()
-	print >> outfile_stemtowords, "***"
 	print >> outfile_stemtowords, "\n--------------------------------------------------------------"
-	print >> outfile_stemtowords, "Stems and their words"
+	print >> outfile_stemtowords, "---  Stems and their words"
 	print >> outfile_stemtowords, "--------------------------------------------------------------"
 	print "  Printing stems and their words."
 	Lexicon.StemCounts = dict()
@@ -1218,30 +1228,46 @@ def printSignatures(Lexicon, lxalogfile, outfile_signatures, outfile_wordstosigs
 		for word in wordlist:
 			stemcount += Lexicon.WordCounts[word]
 		Lexicon.StemCounts[stem]=stemcount
-		print 	 >> outfile_stemtowords, '{:5d}'.format(stemcount),
+		print 	 >> outfile_stemtowords, '{:5d}'.format(stemcount),'; ',
 		stemcount = float(stemcount)	
 		for word in wordlist:
 			wordcount = Lexicon.WordCounts[word]
-			print >> outfile_stemtowords, '{:15}{:4n} {:.1%} '.format(word,wordcount, wordcount/stemcount),
-			 
-
+			print >> outfile_stemtowords, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
 		print >> outfile_stemtowords
 
+        # We print a list of stems with their words (and frequencies) in which only those suffixes which are among the K most frequent suffixes,
+        # in order to use visualization methods that put soft limits on the number of dimensions they can handle well.
+        
+        threshold_for_top_affixes = 11 # this will give us one more than that number, since we are zero-based counting.
+        top_affixes = suffixlist[0:threshold_for_top_affixes]
+	print >> outfile_stemtowords2, "\n--------------------------------------------------------------"
+	print >> outfile_stemtowords2, "---  Stems and their words with high frequency affixes"
+	print >> outfile_stemtowords2, "--------------------------------------------------------------"
+	print "  Printing stems and their words, but only with high frequency affixes."
+	print >>outfile_stemtowords2, "---\n--- Only signatures with these affixes: ", top_affixes
+	print >>outfile_stemtowords2, "---"
+	Lexicon.StemCounts = dict()
+	for stem in stems:
+	        signature = Lexicon.StemToSignature[stem]
+	        for affix in signature:
+	                if affix not in top_affixes:
+	                        print stem, signature, affix
+	                        continue 
+		print >> outfile_stemtowords2, '{:15}'.format(stem),
+		wordlist = Lexicon.StemToWord[stem].keys()
+		wordlist.sort()
+		stemcount = 0
+		for word in wordlist:
+			stemcount += Lexicon.WordCounts[word]
+		Lexicon.StemCounts[stem]=stemcount
+		print 	 >> outfile_stemtowords2, '{:5d}'.format(stemcount),'; ',
+		stemcount = float(stemcount)	
+		for word in wordlist:
+			wordcount = Lexicon.WordCounts[word]
+			print >> outfile_stemtowords2, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
+		print >> outfile_stemtowords2        
+        print top_affixes
 
-
-
-
-	# ----------------------------------------------------------------------------------------------------------------------------#
-	# *** new
-
-	print >>outfile_suffixes,  "--------------------------------------------------------------"
-	print >>outfile_suffixes , "        Suffixes "
-	print >>outfile_suffixes,  "--------------------------------------------------------------"
-	print "  Printing suffixes."
-	suffixlist = list(Lexicon.Suffixes.keys())
-	suffixlist.sort(key=lambda  suffix:Lexicon.Suffixes[suffix], reverse=True)
-	for suffix in suffixlist:
-		print >>outfile_suffixes,"{:8s}{:9,d}".format(suffix, Lexicon.Suffixes[suffix])
 
 
 
