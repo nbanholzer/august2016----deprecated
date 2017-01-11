@@ -27,6 +27,7 @@ import string
 import copy
 from collections import defaultdict
 from lxa_module import *
+from signatures import *
 from fsa import *
 
 #--------------------------------------------------------------------##
@@ -92,6 +93,7 @@ outfile_log_name 			= outfolder + shortfilename + "_log.txt"
 outfile_WordToSig_name			= outfolder + shortfilename + "_WordToSig.txt"
 outfile_wordparses_name 		= outfolder + shortfilename + "_WordParses.txt"
 outfile_wordlist_name 			= outfolder + shortfilename + "_WordList.txt"
+outfile_wordcount_name 			= outfolder + shortfilename + "_WordCounts.txt"
 outfile_suffix_name 			= outfolder + shortfilename + "_suffixes.txt"
 outfile_rebalancing_name 			= outfolder + shortfilename + "_rebalancing_signatures.txt"
 #outfile_FSA_graphics_name		= graphicsfolder + shortfilename + "_FSA_graphics.png"
@@ -136,6 +138,7 @@ outfile_StemToWords   	= open (outfile_stemtowords_name,"w")
 outfile_StemToWords2   	= open (outfile_stemtowords_2_name,"w") 
 outfile_WordParses   	= open (outfile_wordparses_name,"w") 
 outfile_WordList   		= open (outfile_wordlist_name,"w") 
+outfile_WordCounts   		= open (outfile_wordcount_name,"w") 
 outfile_SigExtensions   = open (outfile_SigExtensions_name,"w") 
 outfile_Suffixes   		= open (outfile_suffix_name,"w") 
 outfile_Rebalancing_Signatures    		= open (outfile_rebalancing_name,"w") 
@@ -203,7 +206,7 @@ for line in filelines:
  
 Lexicon.WordList.sort()
 print "\n1. Finished reading word list.\n"
-Lexicon.PrintWordList(outfile_WordList)
+Lexicon.PrintWordCounts(outfile_WordCounts)
 
  
 

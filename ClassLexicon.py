@@ -34,13 +34,14 @@ class CWordList:
         for i in range(len(self.mylist)):
             (drow, leftindex) = templist[i]
             self.mylist[leftindex].rightindex = i
-
+            
+        #not currently used
     def PrintXY(self, outfile):
         Size = float(len(self.mylist))
         for word in self.mylist:
             x = word.leftindex / Size
             y = word.rightindex / Size
-            print >> outfile, "{:20s} {:9.5} {:9.5}".format(word.Key, x, y)
+            print >> outfile, "{:20s}{8i} {:9.5} {:9.5}".format(word.Key, x, y)
 
 
 class CLexicon:
@@ -73,8 +74,12 @@ class CLexicon:
 
         self.TotalRobustInSignatures = 0
 
-    def PrintWordList(self, outfile):
-        self.WordList.PrintXY(outfile)
+    def PrintWordCounts(self, outfile):
+        formatstring = "{:20s} {:6d}"
+        words = self.WordCounts.keys()
+        words.sort()
+        for word in words:
+                print >>outfile, formatstring.format(word, self.WordCounts[word])
 
     def Multinomial(self,this_signature,FindSuffixesFlag):
         counts = dict()
