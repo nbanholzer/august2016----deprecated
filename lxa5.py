@@ -41,7 +41,7 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=10000
+numberofwords 	=1000
 
 NumberOfCorrections = 10
   
@@ -238,10 +238,10 @@ morphology= FSA_lxa(splitEndState)
 
 if True: 	
 	print "2. Make Signatures."
-	MakeSignatures(Lexicon, lxalogfile,outfile_Rebalancing_Signatures,FindSuffixesFlag,Lexicon.MinimumStemLength)
+	Lexicon.MakeSignatures( lxalogfile,outfile_Rebalancing_Signatures,FindSuffixesFlag,Lexicon.MinimumStemLength)
 	
  
-if True:
+if False:
 	print "3. Printing signatures."
 	printSignatures(Lexicon, lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_StemToWords2, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
  
