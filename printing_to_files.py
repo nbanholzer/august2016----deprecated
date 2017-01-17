@@ -3,17 +3,18 @@ from signaturefunctions import *
 from class_alternation import *
 # ----------------------------------------------------------------------------------------------------------------------------#
 def initialize_files(this_lexicon, this_file,singleton_signatures,doubleton_signatures, DisplayList ):
+    formatstring_console = "   {:45s}{:10,d}"
     if this_file == "console":
-        print  "{:45s}{:10,d}".format("Number of words: ", len(this_lexicon.WordList.mylist))
-        print  "{:45s}{:10,d}".format("Total letter count in words ", this_lexicon.TotalLetterCountInWords)
-        print  "{:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
-        print  "{:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
-        print  "{:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print  "{:45s}{:10,d}".format("Total number of letters in stems: ", this_lexicon.LettersInStems)
-        print  "{:45s}{:10,d}".format("Total number of affix letters: ", this_lexicon.AffixLettersInSignatures)
-        print  "{:45s}{:10,d}".format("Total letters in signatures: ", this_lexicon.LettersInStems + this_lexicon.AffixLettersInSignatures)
-        print  "{:45s}{:10,d}".format("Number of analyzed words ", this_lexicon.NumberOfAnalyzedWords)
-        print  "{:45s}{:10,d}".format("Total number of letters in analyzed words ", this_lexicon.LettersInAnalyzedWords)
+        print  formatstring_console.format("Number of words: ", len(this_lexicon.WordList.mylist))
+        print  formatstring_console.format("Total letter count in words ", this_lexicon.TotalLetterCountInWords)
+        print  formatstring_console.format("Number of signatures: ", len(DisplayList))
+        print  formatstring_console.format("Number of singleton signatures: ", singleton_signatures)
+        print  formatstring_console.format("Number of doubleton signatures: ", doubleton_signatures)
+        print  formatstring_console.format("Total number of letters in stems: ", this_lexicon.LettersInStems)
+        print  formatstring_console.format("Total number of affix letters: ", this_lexicon.AffixLettersInSignatures)
+        print  formatstring_console.format("Total letters in signatures: ", this_lexicon.LettersInStems + this_lexicon.AffixLettersInSignatures)
+        print  formatstring_console.format("Number of analyzed words ", this_lexicon.NumberOfAnalyzedWords)
+        print  formatstring_console.format("Total number of letters in analyzed words ", this_lexicon.LettersInAnalyzedWords)
     else:
         print  >> this_file,  "{:45s}{:10,d}".format("Number of words: ", len(this_lexicon.WordList.mylist))
         print   >> this_file, "{:45s}{:10,d}".format("Total letter count in words ", this_lexicon.TotalLetterCountInWords)
@@ -27,7 +28,7 @@ def initialize_files(this_lexicon, this_file,singleton_signatures,doubleton_sign
         print   >> this_file, "{:45s}{:10,d}".format("Total number of letters in analyzed words ", this_lexicon.LettersInAnalyzedWords)
 # ----------------------------------------------------------------------------------------------------------------------------# 
 def print_signature_list_1(this_file, DisplayList,stemcountcutoff, totalrobustness):
-    print "  Printing signature file."
+    print "   Printing signature file."
     runningsum = 0.0
     formatstring1 = '{0:<70}{1:>10s} {2:>15s} {3:>25s} {4:>20s} '
     formatstring2 = '{:<70}{:10d} {:15d} {:25.3%} {:20.3%}'
@@ -106,7 +107,7 @@ def print_suffixes(outfile, Suffixes ):
         print >>outfile,  "--------------------------------------------------------------"
         print >>outfile , "        Suffixes "
         print >>outfile,  "--------------------------------------------------------------"
-        print "  Printing suffixes."
+        print "   Printing suffixes."
         suffixlist = list(Suffixes.keys())
         suffixlist.sort(key=lambda  suffix:Suffixes[suffix], reverse=True)
         for suffix in suffixlist:
@@ -119,7 +120,7 @@ def print_stems(outfile1, outfile2, StemToWord, StemToSignature, WordCounts, suf
         print >> outfile1, "--------------------------------------------------------------"
         print >> outfile1, "---  Stems and their words"
         print >> outfile1, "--------------------------------------------------------------"
-        print "  Printing stems and their words."
+        print "   Printing stems and their words."
         StemCounts = dict()
         for stem in stems:
             print >> outfile1, '{:15}'.format(stem),
@@ -144,7 +145,7 @@ def print_stems(outfile1, outfile2, StemToWord, StemToSignature, WordCounts, suf
         print >> outfile2, "\n--------------------------------------------------------------"
         print >> outfile2, "---  Stems and their words with high frequency affixes"
         print >> outfile2, "--------------------------------------------------------------"
-        print "  Printing stems and their words, but only with high frequency affixes."
+        print "   Printing stems and their words, but only with high frequency affixes."
         print >>outfile2, "---\n--- Only signatures with these affixes: ", top_affixes
         print >>outfile2, "---"
         StemCounts = dict()
@@ -334,7 +335,7 @@ def print_words(outfile, logfile, WordToSig,ColumnWidth ):
             maxnumberofsigs = len(WordToSig[word])
             #print word, maxnumberofsigs
     print >> logfile, "How many words have multiple analyses?"
-    print "  How many words have multiple analyses?"
+    print "   How many words have multiple analyses?"
     for i in range(maxnumberofsigs):
         if i in ambiguity_counts:
             print >> logfile, "{:4d}{:10,d}".format(i, ambiguity_counts[i])
@@ -362,7 +363,7 @@ def print_signature_extensions(outfile, logfile, DisplayList,SignatureToStems ):
     print >>outfile,  "--------------------------------------------------------------"
     print >>outfile, "        Signature extensions  "
     print >>outfile,  "--------------------------------------------------------------"
-    print "  Printing signature extensions."
+    print "   Printing signature extensions."
     ListOfAlternations = list()
     ListOfAlternations2 = list()
     DictOfAlternations = dict()

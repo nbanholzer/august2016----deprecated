@@ -134,15 +134,16 @@ class CLexicon:
         # 4 Rebalancing now, which means:                  -------
         # We look for a stem-final sequence that appears on all or almost all the stems, and shift it to affixes.
         # Make changes in Lexicon.SignatureToStems, and .StemToSig, and .WordToSig, and .StemToWord, and .StemToAffix  and signature_tuples....
+
         threshold = 0.80
         count = self.RebalanceSignatureBreaks2 (threshold, outfile_Rebalancing_Signatures, FindSuffixesFlag) 
         print formatstring1.format("4. Find signature structure function.",count) 
-        if True:
-            if FindSuffixesFlag:
-                Affixes = self.Suffixes
-            else:
-                Affixes = self.Prefixes
-            self.FindSignatureStructure (FindSuffixesFlag, lxalogfile, Affixes, affix_threshold=3)
+
+        if FindSuffixesFlag:
+            Affixes = self.Suffixes
+        else:
+            Affixes = self.Prefixes
+        self.FindSignatureStructure (FindSuffixesFlag, lxalogfile, Affixes, affix_threshold=3)
          
 
         # 5  ------- compute robustness
@@ -249,13 +250,14 @@ class CLexicon:
                     if count % number_of_affixes_per_line == 0:
                         print 
                         print "      ",
-                for sig in self.SignatureToStems:
-                    stems = self.SignatureToStems[sig]
-                    newsig = list()
-                    if len(stems) == 1:         
-                        for affix in sig:
-                            if affix in ConfidentAffixes:
-                                newsig.append(affix)
+                if (False): # not used currently
+                        for sig in self.SignatureToStems:
+                            stems = self.SignatureToStems[sig]
+                            newsig = list()
+                            if len(stems) == 1:         
+                                for affix in sig:
+                                    if affix in ConfidentAffixes:
+                                        newsig.append(affix)
                 print 
 
             #-----------------------------------------------------------------#
@@ -585,7 +587,7 @@ class CLexicon:
                     FindSuffixesFlag):
 # ----------------------------------------------------------------------------------------------------------------------------#
 
-        print "Print signatures from within Lexicon class."
+        print "   Print signatures from within Lexicon class."
         # 1  Create a list of signatures, sorted by number of stems in each. DisplayList is that list. Its triples have the signature, the number of stems, and the signature's robustness.
 
         ColumnWidth = 35

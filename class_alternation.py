@@ -101,7 +101,6 @@ class CProseReportLine:
         self.MyLastItem = None
 
     def MakeReport(self):
-        returnstring="hello!"
         for item in self.MyList:
             returnstring += item.MyHead
             for item2 in self.MyTail:
