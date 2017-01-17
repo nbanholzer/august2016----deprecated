@@ -79,73 +79,6 @@ def decorateFilenameWithIteration(filename, outfolder, extension):
 	return filename
 
 
-# ---------------------------------------------------------#
-def findSignatureInformationContent(signatures, signature, bitsPerLetter):
-	stemSetPhonoInformation = 0
-	stemSetOrderingInformation = 0
-	affixPhonoInformation = 0
-	affixOrderingInformation = 0
-	letters = 0
-	stemset = signatures[signature]
-	for stem in stemset:
-		stemlength = len(stem)
-		letters += stemlength
-		stemSetPhonoInformation += bitsPerLetter * stemlength
-		stemSetOrderingInformation += math.log(stemlength * (stemlength - 1) / 2, 2)
-	for affix in signature:
-		affixlength = len(affix)
-		letters += affixlength
-		affixPhonoInformation += bitsPerLetter * len(affix)
-		if affixlength > 1:
-			affixOrderingInformation += math.log(affixlength * (affixlength - 1) / 2, 2)
-		else:
-			affixOrderingInformation = 0
-	phonoInformation = int(stemSetPhonoInformation + affixPhonoInformation)
-	orderingInformation = int(stemSetOrderingInformation + affixOrderingInformation)
-	return (letters, phonoInformation, orderingInformation)
-
-
-# ---------------------------------------------------------#
-def makeWordListFromSignature(signature, stemset):
-	wordlist = list()
-	word = ""
-	for stem in stemset:
-		for affix in signature:
-			if affix == "NULL":
-				word = stem
-			else:
-				word = stem + affix
-		wordlist.append(word)
-	return wordlist
-
-
-# ---------------------------------------------------------#
-def FindSignature_LetterCountSavings(Signatures, sig):
-	affixlettercount = 0
-	stemlettercount = 0
-	numberOfAffixes = len(sig)
-	numberOfStems = len(Signatures[sig])
-	for affix in sig:
-		affixlettercount += len(affix) + 1
-	for stem in Signatures[sig]:
-		stemlettercount += len(stem) + 1
-	lettercountsavings = affixlettercount * (numberOfStems - 1) + stemlettercount * (numberOfAffixes - 1)
-	return lettercountsavings
-
-
-# ---------------------------------------------------------#
-
-def findWordListInformationContent(wordlist, bitsPerLetter):
-	phonoInformation = 0
-	orderingInformation = 0
-	letters = 0
-	for word  in wordlist:
-		wordlength = len(word)
-		letters += wordlength
-		phonoInformation += bitsPerLetter * wordlength
-		orderingInformation += wordlength * (wordlength - 1) / 2
-	return (letters, phonoInformation, orderingInformation)
-
 
 # ------------------- end of New -----------------------------------------------------------------------------------
 # ---------------------------------------------------------#
@@ -959,45 +892,7 @@ def Sig1ExtendsSig2(sig1, sig2, outfile):  # for suffix signatures
 		return (None, None, None)
 
 
-# ----------------------------------------------------------------------------------------------------------------------------#
-def AverageCountOfTopStems(howmany, sig, Signatures, StemCounts):
-	stemlist = list(Signatures[sig])
-	countlist = []
-	count = 0
-	average = 0
-	for stem in stemlist:
-		countlist.append(StemCounts[stem])
-	countlist = sorted(countlist, reverse=True)
-	if len(countlist) < howmany:
-		howmany = len(countlist)
-	for n in range(howmany):
-		average += countlist[n]
-	average = average / howmany
-	return average
 
-
-# --
-# ----------------------------------------------------------------------------------------------------------------------------#
-def MakeStringFromSignature(sigset, maxlength):
-	sig = "-".join(list(sigset))
-	if len(sig) >  maxlength-2:
-		sig = sig[:maxlength-5] + "..."
-	return sig
-
-def MakeStringFromAlternation(s1,s2,s3,s4):
-	if s1== "":
-		s1 = "nil"
-	if s2== "NULL":
-		s2 = "#"
-	if s3== "":
-		s3 = "nil"
-	if s4== "NULL":
-		s4 = "#"
-
-	str = "{:4s} before {:5s}, and {:4s} before  {:5s}".format(s1,s2,s3,s4)
-	return str
-
-# ----------------------------------------------------------------------------------------------------------------------------#
 
 def EvaluateSignatures(Lexicon, outfile):
 	for sig in Lexicon.Signatures:
@@ -1224,58 +1119,6 @@ def findmaximalrobustsuffix(wordlist):
 # ----------------------------------------------------------------------------------------------------------------------------#
 
 
-# ----------------------------------------------------------------------------------------------------------------------------#
-def find_N_highest_weight_affix(wordlist, FindSuffixesFlag):
-	# ----------------------------------------------------------------------------------------------------------------------------#
-
-	maximalchunksize = 6  # should be 3 or 4 ***********************************
-	totalweight = 0
-	# threshold 		= 50
-	weightthreshold = 0.02
-	# permittedexceptions 	= 2
-	MinimalCount = 10
-	chunkcounts = {}
-	chunkweights = {}
-	chunkweightlist = []
-	tempdict = {}
-	templist = []
-	for word in wordlist:
-		totalweight += len(word)
-
-	if FindSuffixesFlag:
-		for word in wordlist:
-			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the suffix being considered
-				chunk = word[-1 * width:]
-				if not chunk in chunkcounts.keys():
-					chunkcounts[chunk] = 1
-				else:
-					chunkcounts[chunk] += 1
-	else:
-		for word in wordlist:
-			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the prefix being considered
-				chunk = word[:width]
-				if not chunk in chunkcounts.keys():
-					chunkcounts[chunk] = 1
-				else:
-					chunkcounts[chunk] += 1
-	for chunk in chunkcounts.keys():
-		chunkweights[chunk] = chunkcounts[chunk] * len(chunk)
-		if chunkweights[chunk] < weightthreshold * totalweight:
-			continue
-		if chunkcounts[chunk] < MinimalCount:
-			continue
-		tempdict[chunk] = chunkweights[chunk]
-
-	templist = sorted(tempdict.items(), key=lambda chunk: chunk[1], reverse=True)
-	for stem, weight in templist:
-		chunkweightlist.append((stem, weight, chunkcounts[stem]))
-
-	# ----------------------------------------------------------------------------------------------------------------------------#
-	return chunkweightlist
-
-
-# ----------------------------------------------------------------------------------------------------------------------------#
- 
 
 def FindSignatureDifferences():
 	Differences = list()

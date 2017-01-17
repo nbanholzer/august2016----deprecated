@@ -41,7 +41,7 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=1000
+numberofwords 	=100000
 
 NumberOfCorrections = 10
   
@@ -241,9 +241,9 @@ if True:
 	Lexicon.MakeSignatures( lxalogfile,outfile_Rebalancing_Signatures,FindSuffixesFlag,Lexicon.MinimumStemLength)
 	
  
-if False:
+if True:
 	print "3. Printing signatures."
-	printSignatures(Lexicon, lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_StemToWords2, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
+	Lexicon.printSignatures(lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_StemToWords2, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
  
 if False:
 	print "4. Printing signature transforms for each word."

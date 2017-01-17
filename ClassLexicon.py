@@ -1,4 +1,6 @@
 import sys
+import math
+from signaturefunctions import *
 
 # This is just part of documentation:
 # A signature is a tuple of strings (each an affix).
@@ -545,11 +547,11 @@ class CLexicon:
     # ----------------------------------------------------------------------------------------------------------------------------#
 
 
-
+        print "Print signatures from within Lexicon class."
         # Print signatures (not their stems) , sorted by number of stems
         ColumnWidth = 35
-        stemcountcutoff = Lexicon.MinimumStemsInaSignature
-        SortedListOfSignatures = sorted(Lexicon.SignatureToStems.items(), lambda x, y: cmp(len(x[1]), len(y[1])),
+        stemcountcutoff = self.MinimumStemsInaSignature
+        SortedListOfSignatures = sorted(self.SignatureToStems.items(), lambda x, y: cmp(len(x[1]), len(y[1])),
                                         reverse=True)
         DisplayList = []
         for sig, stems in SortedListOfSignatures:
@@ -576,16 +578,16 @@ class CLexicon:
 
      
 
-        print  >> outfile_signatures,  "{:45s}{:10,d}".format("Number of words: ", len(Lexicon.WordList.mylist))
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letter count in words ", Lexicon.TotalLetterCountInWords)
+        print  >> outfile_signatures,  "{:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
         print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
         print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
         print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in stems: ", Lexicon.LettersInStems)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of affix letters: ", Lexicon.AffixLettersInSignatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letters in signatures: ", Lexicon.LettersInStems + Lexicon.AffixLettersInSignatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of analyzed words ", Lexicon.NumberOfAnalyzedWords)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in analyzed words ", Lexicon.LettersInAnalyzedWords)
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
+        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
     #   print   >> outfile_signatures, "{:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
         print
 
@@ -593,38 +595,38 @@ class CLexicon:
         
      
 
-        print  >>lxalogfile,  "{:45s}{:10,d}".format("Number of words: ", len(Lexicon.WordList.mylist))
-        print  >>lxalogfile, "{:45s}{:10,d}".format("Total letter count in words ", Lexicon.TotalLetterCountInWords)
+        print  >>lxalogfile,  "{:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
+        print  >>lxalogfile, "{:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
         print  >>lxalogfile, "{:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
         print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
         print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in stems: ", Lexicon.LettersInStems)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of affix letters: ", Lexicon.AffixLettersInSignatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total letters in signatures: ", Lexicon.LettersInStems + Lexicon.AffixLettersInSignatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of analyzed words ", Lexicon.NumberOfAnalyzedWords)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in analyzed words ", Lexicon.LettersInAnalyzedWords)
+        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
+        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
+        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
+        print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
+        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
     #   print  >>lxalogfile, "{:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
         print
 
 
 
-        print   "  {:45s}{:10,d}".format("Number of words: ", len(Lexicon.WordList.mylist))
-        print   "  {:45s}{:10,d}".format("Total letter count in words ", Lexicon.TotalLetterCountInWords)
+        print   "  {:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
+        print   "  {:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
         print   "  {:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
         print   "  {:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
         print   "  {:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print   "  {:45s}{:10,d}".format("Total number of letters in stems: ", Lexicon.LettersInStems)
-        print   "  {:45s}{:10,d}".format("Total number of affix letters: ", Lexicon.AffixLettersInSignatures)
-        print   "  {:45s}{:10,d}".format("Total letters in signatures: ", Lexicon.LettersInStems + Lexicon.AffixLettersInSignatures)
-        print   "  {:45s}{:10,d}".format("Number of analyzed words ", Lexicon.NumberOfAnalyzedWords)
-        print   "  {:45s}{:10,d}".format("Total number of letters in analyzed words ", Lexicon.LettersInAnalyzedWords)
+        print   "  {:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
+        print   "  {:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
+        print   "  {:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
+        print   "  {:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
+        print   "  {:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
     #   print   "  {:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
         print
 
 
         for sig, stemcount, robustness in DisplayList:
-            if len(Lexicon.SignatureToStems[sig]) > 5:
-                Lexicon.Multinomial(sig,FindSuffixesFlag)
+            if len(self.SignatureToStems[sig]) > 5:
+                self.Multinomial(sig,FindSuffixesFlag)
 
 
 
@@ -687,7 +689,7 @@ class CLexicon:
                 print >> outfile_signatures, "\n=============================================\n", '{0:30s} \n'.format(sig)
             n = 0
 
-            stemlist = Lexicon.SignatureToStems[sig].keys()
+            stemlist = self.SignatureToStems[sig].keys()
             stemlist.sort()
             numberofstems = len(stemlist)
             for stem in stemlist:
@@ -699,14 +701,14 @@ class CLexicon:
             print >> outfile_signatures, "\n-------------------------"
             # ------------------- New -----------------------------------------------------------------------------------
             howmany = 5     
-            print >>outfile_signatures, "Average count of top",howmany, " stems:" , AverageCountOfTopStems(howmany, sig, Lexicon.SignatureToStems, Lexicon.StemCounts)
+            print >>outfile_signatures, "Average count of top",howmany, " stems:" , AverageCountOfTopStems(howmany, sig, self.SignatureToStems, self.StemCounts)
             
 
             # ------------------------------------------------------------------------------------------------------
             bitsPerLetter = 5
-            wordlist = makeWordListFromSignature(sig, Lexicon.SignatureToStems[sig])
+            wordlist = makeWordListFromSignature(sig, self.SignatureToStems[sig])
             (a, b, c) = findWordListInformationContent(wordlist, bitsPerLetter)
-            (d, e, f) = findSignatureInformationContent(Lexicon.SignatureToStems, sig, bitsPerLetter)
+            (d, e, f) = findSignatureInformationContent(self.SignatureToStems, sig, bitsPerLetter)
             formatstring = '%35s %10d  '
             formatstringheader = '%35s %10s    %10s  %10s'
             print >> outfile_signatures, formatstringheader % ("", "Phono", "Ordering", "Total")
@@ -732,7 +734,7 @@ class CLexicon:
 
                 # print WORDS of each signature:
         if True:
-            words = Lexicon.WordToSig.keys()
+            words = self.WordToSig.keys()
             words.sort()
             print >> outfile_wordstosigs, "***"
             print >> outfile_wordstosigs, "\n--------------------------------------------------------------"
@@ -740,13 +742,13 @@ class CLexicon:
             print >> outfile_wordstosigs, "--------------------------------------------------------------"
             maxnumberofsigs = 0
             ambiguity_counts = dict()
-            for word in Lexicon.WordToSig:
-                ambiguity = len(Lexicon.WordToSig[word])
+            for word in self.WordToSig:
+                ambiguity = len(self.WordToSig[word])
                 if ambiguity not in ambiguity_counts:
                     ambiguity_counts[ambiguity] = 0
                 ambiguity_counts[ambiguity] += 1
-                if len(Lexicon.WordToSig[word]) > maxnumberofsigs:
-                    maxnumberofsigs = len(Lexicon.WordToSig[word])
+                if len(self.WordToSig[word]) > maxnumberofsigs:
+                    maxnumberofsigs = len(self.WordToSig[word])
                     #print word, maxnumberofsigs
             print >> lxalogfile, "How many words have multiple analyses?"
             print "  How many words have multiple analyses?"
@@ -756,13 +758,13 @@ class CLexicon:
                     print                "{:4d}{:10,d}".format(i, ambiguity_counts[i])
      
 
-            wordlist = Lexicon.WordToSig.keys()
+            wordlist = self.WordToSig.keys()
             wordlist.sort()
 
             for word in wordlist:
                 print >> outfile_wordstosigs, '{0:<30}'.format(word), ":",
-                for n in range(len(Lexicon.WordToSig[word])):               
-                    sig = MakeStringFromSignature(Lexicon.WordToSig[word][n], ColumnWidth)
+                for n in range(len(self.WordToSig[word])):               
+                    sig = MakeStringFromSignature(self.WordToSig[word][n], ColumnWidth)
                     print >> outfile_wordstosigs, sig + " " * (ColumnWidth - len(sig)),
                 print >> outfile_wordstosigs
 
@@ -771,31 +773,31 @@ class CLexicon:
         print >>outfile_suffixes , "        Suffixes "
         print >>outfile_suffixes,  "--------------------------------------------------------------"
         print "  Printing suffixes."
-        suffixlist = list(Lexicon.Suffixes.keys())
-        suffixlist.sort(key=lambda  suffix:Lexicon.Suffixes[suffix], reverse=True)
+        suffixlist = list(self.Suffixes.keys())
+        suffixlist.sort(key=lambda  suffix:self.Suffixes[suffix], reverse=True)
         for suffix in suffixlist:
-            print >>outfile_suffixes,"{:8s}{:9,d}".format(suffix, Lexicon.Suffixes[suffix])
+            print >>outfile_suffixes,"{:8s}{:9,d}".format(suffix, self.Suffixes[suffix])
 
 
-        stems = Lexicon.StemToWord.keys()
+        stems = self.StemToWord.keys()
         stems.sort()
         print >> outfile_stemtowords, "--------------------------------------------------------------"
         print >> outfile_stemtowords, "---  Stems and their words"
         print >> outfile_stemtowords, "--------------------------------------------------------------"
         print "  Printing stems and their words."
-        Lexicon.StemCounts = dict()
+        self.StemCounts = dict()
         for stem in stems:
             print >> outfile_stemtowords, '{:15}'.format(stem),
-            wordlist = Lexicon.StemToWord[stem].keys()
+            wordlist = self.StemToWord[stem].keys()
             wordlist.sort()
             stemcount = 0
             for word in wordlist:
-                stemcount += Lexicon.WordCounts[word]
-            Lexicon.StemCounts[stem]=stemcount
+                stemcount += self.WordCounts[word]
+            self.StemCounts[stem]=stemcount
             print    >> outfile_stemtowords, '{:5d}'.format(stemcount),'; ',
             stemcount = float(stemcount)    
             for word in wordlist:
-                wordcount = Lexicon.WordCounts[word]
+                wordcount = self.WordCounts[word]
                 print >> outfile_stemtowords, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
             print >> outfile_stemtowords
 
@@ -810,27 +812,27 @@ class CLexicon:
         print "  Printing stems and their words, but only with high frequency affixes."
         print >>outfile_stemtowords2, "---\n--- Only signatures with these affixes: ", top_affixes
         print >>outfile_stemtowords2, "---"
-        Lexicon.StemCounts = dict()
+        self.StemCounts = dict()
         for stem in stems:
-            signature = Lexicon.StemToSignature[stem]
+            signature = self.StemToSignature[stem]
             for affix in signature:
                 if affix not in top_affixes:
-                    print stem, signature, affix
+                    #print stem, signature, affix
                     continue 
             print >> outfile_stemtowords2, '{:15}'.format(stem),
-            wordlist = Lexicon.StemToWord[stem].keys()
+            wordlist = self.StemToWord[stem].keys()
             wordlist.sort()
             stemcount = 0
             for word in wordlist:
-                stemcount += Lexicon.WordCounts[word]
-            Lexicon.StemCounts[stem]=stemcount
+                stemcount += self.WordCounts[word]
+            self.StemCounts[stem]=stemcount
             print    >> outfile_stemtowords2, '{:5d}'.format(stemcount),'; ',
             stemcount = float(stemcount)    
             for word in wordlist:
-                wordcount = Lexicon.WordCounts[word]
+                wordcount = self.WordCounts[word]
                 print >> outfile_stemtowords2, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
             print >> outfile_stemtowords2        
-            print top_affixes
+            #print top_affixes
 
 
 
@@ -862,7 +864,7 @@ class CLexicon:
                     continue
 
                 (AlignedList1, AlignedList2, Differences) = Sig1ExtendsSig2(sig2,sig1,lxalogfile)
-                stemcount = len(Lexicon.SignatureToStems[sig2])
+                stemcount = len(self.SignatureToStems[sig2])
 
                 
 
@@ -1385,6 +1387,22 @@ def TestForCommonEdge(stemlist, outfile,  threshold, FindSuffixesFlag):
  
 
 
+# ----------------------------------------------------------------------------------------------------------------------------#
+def AverageCountOfTopStems(howmany, sig, Signatures, StemCounts):
+	stemlist = list(Signatures[sig])
+	countlist = []
+	count = 0
+	average = 0
+	for stem in stemlist:
+		countlist.append(StemCounts[stem])
+	countlist = sorted(countlist, reverse=True)
+	if len(countlist) < howmany:
+		howmany = len(countlist)
+	for n in range(howmany):
+		average += countlist[n]
+	average = average / howmany
+	return average
+
 
 
 
@@ -1410,4 +1428,146 @@ def getrobustness(sig, stems):
 
 
 # ----------------------------------------------------------------------------------------------------------------------------#
+# ---------------------------------------------------------#
+def makeWordListFromSignature(signature, stemset):
+	wordlist = list()
+	word = ""
+	for stem in stemset:
+		for affix in signature:
+			if affix == "NULL":
+				word = stem
+			else:
+				word = stem + affix
+		wordlist.append(word)
+	return wordlist
 
+
+
+# ---------------------------------------------------------#
+
+def findWordListInformationContent(wordlist, bitsPerLetter):
+	phonoInformation = 0
+	orderingInformation = 0
+	letters = 0
+	for word  in wordlist:
+		wordlength = len(word)
+		letters += wordlength
+		phonoInformation += bitsPerLetter * wordlength
+		orderingInformation += wordlength * (wordlength - 1) / 2
+	return (letters, phonoInformation, orderingInformation)
+
+
+# ---------------------------------------------------------#
+def findSignatureInformationContent(signatures, signature, bitsPerLetter):
+	stemSetPhonoInformation = 0
+	stemSetOrderingInformation = 0
+	affixPhonoInformation = 0
+	affixOrderingInformation = 0
+	letters = 0
+	stemset = signatures[signature]
+	for stem in stemset:
+		stemlength = len(stem)
+		letters += stemlength
+		stemSetPhonoInformation += bitsPerLetter * stemlength
+		stemSetOrderingInformation += math.log(stemlength * (stemlength - 1) / 2, 2)
+	for affix in signature:
+		affixlength = len(affix)
+		letters += affixlength
+		affixPhonoInformation += bitsPerLetter * len(affix)
+		if affixlength > 1:
+			affixOrderingInformation += math.log(affixlength * (affixlength - 1) / 2, 2)
+		else:
+			affixOrderingInformation = 0
+	phonoInformation = int(stemSetPhonoInformation + affixPhonoInformation)
+	orderingInformation = int(stemSetOrderingInformation + affixOrderingInformation)
+	return (letters, phonoInformation, orderingInformation)
+
+
+
+# ---------------------------------------------------------#
+def FindSignature_LetterCountSavings(Signatures, sig):
+	affixlettercount = 0
+	stemlettercount = 0
+	numberOfAffixes = len(sig)
+	numberOfStems = len(Signatures[sig])
+	for affix in sig:
+		affixlettercount += len(affix) + 1
+	for stem in Signatures[sig]:
+		stemlettercount += len(stem) + 1
+	lettercountsavings = affixlettercount * (numberOfStems - 1) + stemlettercount * (numberOfAffixes - 1)
+	return lettercountsavings
+
+# ----------------------------------------------------------------------------------------------------------------------------#
+def find_N_highest_weight_affix(wordlist, FindSuffixesFlag):
+	# ----------------------------------------------------------------------------------------------------------------------------#
+
+	maximalchunksize = 6  # should be 3 or 4 ***********************************
+	totalweight = 0
+	# threshold 		= 50
+	weightthreshold = 0.02
+	# permittedexceptions 	= 2
+	MinimalCount = 10
+	chunkcounts = {}
+	chunkweights = {}
+	chunkweightlist = []
+	tempdict = {}
+	templist = []
+	for word in wordlist:
+		totalweight += len(word)
+
+	if FindSuffixesFlag:
+		for word in wordlist:
+			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the suffix being considered
+				chunk = word[-1 * width:]
+				if not chunk in chunkcounts.keys():
+					chunkcounts[chunk] = 1
+				else:
+					chunkcounts[chunk] += 1
+	else:
+		for word in wordlist:
+			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the prefix being considered
+				chunk = word[:width]
+				if not chunk in chunkcounts.keys():
+					chunkcounts[chunk] = 1
+				else:
+					chunkcounts[chunk] += 1
+	for chunk in chunkcounts.keys():
+		chunkweights[chunk] = chunkcounts[chunk] * len(chunk)
+		if chunkweights[chunk] < weightthreshold * totalweight:
+			continue
+		if chunkcounts[chunk] < MinimalCount:
+			continue
+		tempdict[chunk] = chunkweights[chunk]
+
+	templist = sorted(tempdict.items(), key=lambda chunk: chunk[1], reverse=True)
+	for stem, weight in templist:
+		chunkweightlist.append((stem, weight, chunkcounts[stem]))
+
+	# ----------------------------------------------------------------------------------------------------------------------------#
+	return chunkweightlist
+
+
+# ----------------------------------------------------------------------------------------------------------------------------#
+ 
+# --
+# ----------------------------------------------------------------------------------------------------------------------------#
+def MakeStringFromSignature(sigset, maxlength):
+	sig = "-".join(list(sigset))
+	if len(sig) >  maxlength-2:
+		sig = sig[:maxlength-5] + "..."
+	return sig
+
+def MakeStringFromAlternation(s1,s2,s3,s4):
+	if s1== "":
+		s1 = "nil"
+	if s2== "NULL":
+		s2 = "#"
+	if s3== "":
+		s3 = "nil"
+	if s4== "NULL":
+		s4 = "#"
+
+	str = "{:4s} before {:5s}, and {:4s} before  {:5s}".format(s1,s2,s3,s4)
+	return str
+
+# ----------------------------------------------------------------------------------------------------------------------------#
