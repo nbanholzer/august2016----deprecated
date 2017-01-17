@@ -89,6 +89,7 @@ class CLexicon:
 # ----------------------------------------------------------------------------------------------------------------------------#
         formatstring1 =  "  {:50s}{:>10,}"
         formatstring2 =  "  {:50s}"
+        formatstring3 =  "{:40s}{:10,d}"
         print formatstring2.format("The MakeSignatures function")
 
         # Protostems are candidate stems made during the algorithm, but not kept afterwards.
@@ -111,7 +112,7 @@ class CLexicon:
 
         self.FindAffixes( Protostems,  FindSuffixesFlag)
         print formatstring1.format("1b. Finished finding affixes for protostems.", len(self.Suffixes)+ len(self.Prefixes))  
-         
+
         # 2 It is possible for a stem to have only one affix at this point. We must eliminate those analyses.  -------
         ListOfStemsToRemove = list()
         for stem in self.StemToAffix:
@@ -122,7 +123,8 @@ class CLexicon:
         for stem in ListOfStemsToRemove:
             del self.StemToWord[stem]
             del self.StemToAffix[stem]
-             
+
+
         # 3  Execute Stems-to-signatures. This is in a sense the most important step.        -------
         
         self.LettersInStems                         =0
@@ -151,11 +153,11 @@ class CLexicon:
         print  formatstring2.format("5. Computed robustness")  
 
         #8  ------- Print
-        print >> lxalogfile, "{:40s}{:10,d}".format("Number of analyzed words", self.NumberOfAnalyzedWords)
-        print >> lxalogfile, "{:40s}{:10,d}".format("Number of unanalyzed words", self.NumberOfUnanalyzedWords)
-        print >> lxalogfile, "{:40s}{:10,d}".format("Letters in stems", self.LettersInStems)
-        print >> lxalogfile, "{:40s}{:10,d}".format("Letters in affixes", self.AffixLettersInSignatures)
-        print >> lxalogfile, "{:40s}{:10,d}".format("Total robustness in signatures", self.TotalRobustnessInSignatures)
+        print >> lxalogfile, formatstring3.format("Number of analyzed words", self.NumberOfAnalyzedWords)
+        print >> lxalogfile, formatstring3.format("Number of unanalyzed words", self.NumberOfUnanalyzedWords)
+        print >> lxalogfile, formatstring3.format("Letters in stems", self.LettersInStems)
+        print >> lxalogfile, formatstring3.format("Letters in affixes", self.AffixLettersInSignatures)
+        print >> lxalogfile, formatstring3.format("Total robustness in signatures", self.TotalRobustnessInSignatures)
     
         return
 # ----------------------------------------------------------------------------------------------------------------------------#
@@ -211,6 +213,8 @@ class CLexicon:
             self.WordToSig = {}
             self.StemCounts = {}
 
+            NumberOfColumns = 8
+            number_of_affixes_per_line = 10
             #  Signatures with way too many affixes are spurious.
             # If we have already run this function before, we have a set of affixes ranked by frequency,
             # and we can use these now to eliminate low frequency suffixes from signatures with
@@ -219,9 +223,12 @@ class CLexicon:
             # Number of affixes we are confident in:
             formatstring1 =  "       {:50s}{:>10,}"
             formatstring2 =  "       {:50s}"
+            formatstring3 =  "\n       Top {:>10,}  affixes retained for use now (out of {:>5} )"
+
+
             print formatstring2.format("Inside Find_Signature_Structure.")
             print formatstring2.format("i. Finding affixes we are confident about.")
-            number_of_affixes_per_line = 10
+
 
             # -----------------------------------------------------------------#
             # Block 1. This block defines affixes, confident affixes, and signatures.
@@ -240,9 +247,9 @@ class CLexicon:
                 SortedAffixes = list(Affixes.keys())
                 SortedAffixes.sort(key=lambda affix:Affixes[affix], reverse=True)
                 
-                print "\n       Top ", NumberOfConfidentAffixes, "affixes retained for use now (out of", len(SortedAffixes),")."
+                print formatstring3.format(NumberOfConfidentAffixes, len(SortedAffixes))   
                 count = 0
-                print "      ",
+                print " "*6,
                 for affixno in range(NumberOfConfidentAffixes):
                     ConfidentAffixes[SortedAffixes[affixno]]=1
                     print  "{:6s} ".format(SortedAffixes[affixno]),
@@ -265,14 +272,19 @@ class CLexicon:
             # -----------------------------------------------------------------#              
              
             # Creates Lexicon.StemToWord, Lexicon.StemToAffix. 
+            column_no = 0
             print 
             print formatstring2.format("ii. Reanalyzing words, finding both stems and affixes.")
             if True:
-                print "                 Word number:",
-                for i in range(len(self.WordList.mylist)):          
+                print " "*11 + "Word number:",
+                for i in range(len(self.WordList.mylist)): 
                     if i % 2500 == 0:
                         print "{:7,d}".format(i),           
                         sys.stdout.flush()
+                        column_no += 1
+                        if column_no % NumberOfColumns == 0:
+                            column_no = 0
+                            print "\n" + " "*11,               
                     word = self.WordList.mylist[i].Key
                     WordAnalyzedFlag = False
                     for i in range(len(word)-1 , self.MinimumStemLength-1, -1):   # loop on positions in the word, left to right
@@ -298,8 +310,8 @@ class CLexicon:
                             if stem not in self.StemToAffix:
                                 self.StemToAffix[stem] = dict()
                             self.StemToAffix[stem][affix] = 1 
-                            if stem in self.WordCounts: # this is for the case where the stem is a free-standing word also                               
-                                self.StemToWord[stem][word] = 1
+                            if stem in self.WordCounts: # this is for the case where the stem is a free-standing word also 
+                                self.StemToWord[stem][stem] = 1
                                 self.StemToAffix[stem]["NULL"] = 1
                             if stem not in self.StemCounts:
                                 self.StemCounts[stem] = 0
@@ -324,13 +336,15 @@ class CLexicon:
                      
 
 
-            print "       iii. Finding an initial set of signatures."
+            print "       iii. Finding a set of signatures."
 
             StemsToEliminate = list()
             for stem in self.StemToWord:
                 self.LettersInStems += len(stem)
                 signature = list(self.StemToAffix[stem])
                 signature.sort()
+                #if stem == "abandon":
+                #    print stem, signature
                 signature_tuple = tuple(signature)
                 if len(signature) == 1:
                     StemsToEliminate.append(stem)
@@ -466,13 +480,11 @@ class CLexicon:
                         self.StemToWord[stem][word]=1
                         if stem not in self.StemToAffix:
                             self.StemToAffix[stem] = dict()
-                            self.StemToAffix[stem][suffix] = 1 
+                        self.StemToAffix[stem][suffix] = 1 
                         if stem in self.WordCounts:
-                            self.StemToWord[stem][word] = 1
+                            self.StemToWord[stem][stem] = 1
                             self.StemToAffix[stem]["NULL"] = 1
                             self.Suffixes[suffix]=1 
-         
-         
 
             else:
                 for i in range(len(wordlist)):
@@ -488,7 +500,7 @@ class CLexicon:
                                 continue
                             if stem not in self.StemToWord:
                                 self.StemToWord[stem] = dict()
-                            self.StemToWord[stem][word]=1   
+                            self.StemToWord[stem][stem]=1   
                             if stem not in self.StemToAffix:
                                 self.StemToAffix[stem] = dict() 
                             self.StemToAffix[stem][prefix]=1        
@@ -517,7 +529,6 @@ class CLexicon:
                 shiftingchunk, shiftingchunkcount  = TestForCommonEdge(self.SignatureToStems[sig], outfile, threshold, FindSuffixesFlag) 
 
                 if shiftingchunkcount > 0:
-                    #print "CC" ,sig, shiftingchunk
                     print >>outfile,"{:5s} count: {:5d}".format(shiftingchunk,   shiftingchunkcount)
                 else:
                     print >>outfile, "no chunk to shift"  

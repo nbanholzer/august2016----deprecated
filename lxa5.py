@@ -41,20 +41,20 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=10000
+numberofwords 	=1000000
 
 NumberOfCorrections = 10
   
 language="english"
-#language="english-encarta"
+language="english-encarta"
 #language="german"
 #language="swahili"
 #language="french"
 #language="latin"
 
-#shortfilename = "english-encarta"
+shortfilename = "english-encarta"
 #shortfilename = "german"
-shortfilename="browncorpus"
+#shortfilename="browncorpus"
 #shortfilename="swahili"
 #shortfilename = "encarta_french_UTF8"
 #shortfilename="bible"
@@ -242,7 +242,7 @@ if True:
 	
  
 if True:
-	print "3. Printing signatures."
+	print "\n3. Printing signatures."
 	Lexicon.printSignatures(lxalogfile, outfile_Signatures, outfile_WordToSig, outfile_StemToWords, outfile_StemToWords2, outfile_SigExtensions,outfile_Suffixes ,g_encoding, FindSuffixesFlag)
  
 if False:
