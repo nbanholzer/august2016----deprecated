@@ -1,6 +1,7 @@
 import sys
 import math
 from signaturefunctions import *
+from printing_to_files import *
 
 # This is just part of documentation:
 # A signature is a tuple of strings (each an affix).
@@ -156,6 +157,44 @@ class CLexicon:
         print >> lxalogfile, "{:40s}{:10,d}".format("Total robustness in signatures", self.TotalRobustnessInSignatures)
     
         return
+# ----------------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------------------------------------------------------#
+    def StemsToSignatures(self,FindSuffixesFlag):
+        if FindSuffixesFlag:
+            Affixes = self.Suffixes
+        else:
+            Affixes = self.Prefixes
+
+        #  Iterate through each stem, get its affixes and count them, and create signatures. 
+        for stem in self.StemToWord:
+            self.LettersInStems += len(stem)
+            signature = list(self.StemToAffix[stem])
+            signature.sort()
+            signature_tuple = tuple(signature)
+            for affix in signature:
+                if affix not in Affixes:
+                    Affixes[affix] = 0
+                Affixes[affix] += 1
+            if signature_tuple not in self.SignatureToStems:
+                self.SignatureToStems[signature_tuple] = dict()
+                for affix in signature:
+                    self.TotalLetterCostOfAffixesInSignatures += len(affix)
+            self.SignatureToStems[signature_tuple][stem] = 1
+            self.StemToSignature[stem] = signature_tuple
+            for word in self.StemToWord[stem]:
+                if word not in self.WordToSig:
+                    self.WordToSig[word] = list()
+                self.WordToSig[word].append(signature_tuple)
+        for sig in self.SignatureToStems:           
+            if len(self.SignatureToStems[sig]) < self.MinimumStemsInaSignature:
+                for stem in self.SignatureToStems[sig]:
+                    del self.StemToSignature[stem]
+                    for word in self.StemToWord[stem]:
+                        if len( self.WordToSig[word] ) == 1:                     
+                            del self.WordToSig[word]
+                        else:
+                            self.WordToSig[word].remove(sig)
+                    del self.StemToWord[stem]
 
 # ----------------------------------------------------------------------------------------------------------------------------#
     def FindSignatureStructure (self, FindSuffixesFlag, outfile, Affixes = None, affix_threshold = 1):
@@ -544,25 +583,23 @@ class CLexicon:
 #--------------------------------------------------------------------------------------------------------------------------#
     def printSignatures(self, lxalogfile, outfile_signatures, outfile_wordstosigs, outfile_stemtowords, outfile_stemtowords2, outfile_SigExtensions, outfile_suffixes, encoding,
                     FindSuffixesFlag):
-    # ----------------------------------------------------------------------------------------------------------------------------#
-
+# ----------------------------------------------------------------------------------------------------------------------------#
 
         print "Print signatures from within Lexicon class."
-        # Print signatures (not their stems) , sorted by number of stems
+        # 1  Create a list of signatures, sorted by number of stems in each. DisplayList is that list. Its triples have the signature, the number of stems, and the signature's robustness.
+
         ColumnWidth = 35
         stemcountcutoff = self.MinimumStemsInaSignature
         SortedListOfSignatures = sorted(self.SignatureToStems.items(), lambda x, y: cmp(len(x[1]), len(y[1])),
                                         reverse=True)
+
         DisplayList = []
         for sig, stems in SortedListOfSignatures:
             if len(stems) < stemcountcutoff:
                 continue;
             DisplayList.append((sig, len(stems), getrobustness(sig, stems)))
         DisplayList.sort
-
-        # ____________________________________________
-        # This first part is for Jackson's program.
-
+ 
         singleton_signatures = 0
         doubleton_signatures = 0
 
@@ -576,343 +613,32 @@ class CLexicon:
         for sig, stemcount, robustness in DisplayList:
             totalrobustness += robustness
 
-     
-
-        print  >> outfile_signatures,  "{:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
-        print   >> outfile_signatures, "{:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
-    #   print   >> outfile_signatures, "{:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
-        print
-
-
-        
-     
-
-        print  >>lxalogfile,  "{:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
-        print  >>lxalogfile, "{:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
-        print  >>lxalogfile, "{:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
-        print  >>lxalogfile,    "{:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
-    #   print  >>lxalogfile, "{:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
-        print
-
-
-
-        print   "  {:45s}{:10,d}".format("Number of words: ", len(self.WordList.mylist))
-        print   "  {:45s}{:10,d}".format("Total letter count in words ", self.TotalLetterCountInWords)
-        print   "  {:45s}{:10,d}".format("Number of signatures: ", len(DisplayList))
-        print   "  {:45s}{:10,d}".format("Number of singleton signatures: ", singleton_signatures)
-        print   "  {:45s}{:10,d}".format("Number of doubleton signatures: ", doubleton_signatures)
-        print   "  {:45s}{:10,d}".format("Total number of letters in stems: ", self.LettersInStems)
-        print   "  {:45s}{:10,d}".format("Total number of affix letters: ", self.AffixLettersInSignatures)
-        print   "  {:45s}{:10,d}".format("Total letters in signatures: ", self.LettersInStems + self.AffixLettersInSignatures)
-        print   "  {:45s}{:10,d}".format("Number of analyzed words ", self.NumberOfAnalyzedWords)
-        print   "  {:45s}{:10,d}".format("Total number of letters in analyzed words ", self.LettersInAnalyzedWords)
-    #   print   "  {:45s}{:10.2f}".format("Compression ", (Lexicon.LettersInAnalyzedWords - Lexicon.LettersInStems - Lexicon.AffixLettersInSignatures)/ float(Lexicon.LettersInAnalyzedWords))
-        print
-
+        initialize_files(self, outfile_signatures,singleton_signatures,doubleton_signatures,DisplayList ) 
+        initialize_files(self, lxalogfile,singleton_signatures,doubleton_signatures,DisplayList ) 
+        initialize_files(self, "console",singleton_signatures,doubleton_signatures,DisplayList ) 
 
         for sig, stemcount, robustness in DisplayList:
             if len(self.SignatureToStems[sig]) > 5:
                 self.Multinomial(sig,FindSuffixesFlag)
-
-
-
      
-        runningsum = 0.0
-        if (False):
-            print >> outfile_signatures, "\n" + "-" * 150
-            print >> outfile_signatures, '{0:<70}{1:>20s} {2:>10s} {3:>25s} {4:>20s} '.format("Signature", "Stem count",
-                                                                                              "Robustness",
-                                                                                              "Proportion of robustness",
-                                                                                              "Running sum")
-            print >> outfile_signatures, "-" * 150
-            for sig, stemcount, robustness in DisplayList:
-                runningsum += robustness
-                if len(sig) == 0:
-                    print >> outfile_signatures, "PROBLEM!!"
-                if encoding == "utf8":
-                    print >> outfile_signatures, sig, stemcount, robustness
-                else:
-                    print >> outfile_signatures, '{0:<70}{1:10d} {2:15d} {3:25.3%} {4:20.3%}'.format(sig, stemcount, robustness, float(robustness) / totalrobustness, runningsum / totalrobustness)
-            print >> outfile_signatures, "--------------------------------------------------------------"
-
         # Print signatures (not their stems) sorted by robustness
-        if (True):
-            print "  Printing signature file."
-            print >> outfile_signatures, "\n" + "-" * 150
-            print >> outfile_signatures, '{0:<70}{1:>10s} {2:>15s} {3:>25s} {4:>20s} '.format("Signature", "Stem count", "Robustness", "Proportion of robustness",    "Running sum")
-            print >> outfile_signatures, "-" * 150      
-            DisplayList = sorted(DisplayList, lambda x, y: cmp(x[2], y[2]), reverse=True)
-     
-            for sig, stemcount, robustness in DisplayList:
-                runningsum+=robustness
-                if stemcount < stemcountcutoff:
-                    break;
-                if encoding == "utf8":
-                    print >> outfile_signatures, sig, stemcount, robustness
-                else:
-                    formatstring = '{:<70}{:10d} {:15d} {:25.3%} {:20.3%}'
-                    robustnessproportion = float(robustness) / totalrobustness
-                    runningsumproportion = runningsum/totalrobustness
-                    print >> outfile_signatures, formatstring.format(sig, stemcount, robustness,robustnessproportion, runningsumproportion )
-            print >> outfile_signatures, "--------------------------------------------------------------"
+        print_signature_list_1(outfile_signatures, DisplayList, stemcountcutoff,totalrobustness)
 
+        # Print suffixes
+        suffix_list = print_suffixes(outfile_suffixes,self.Suffixes  )
 
-
-
-        # for sig, stemcount, robustness in DisplayList:
+        # Print stems
+        print_stems(outfile_stemtowords, outfile_stemtowords2, self.StemToWord, self.StemToSignature, self.WordCounts, suffix_list)
 
         # print the stems of each signature:
+        print_signature_list_2(outfile_signatures, DisplayList, stemcountcutoff,totalrobustness, self.SignatureToStems, self.StemCounts, FindSuffixesFlag)
 
-        numberofstemsperline = 6
-        stemlist = []
-        reversedstemlist = []
-        count = 0
-        print >> outfile_signatures, "*** Stems in each signature"
-        for sig, stemcount, robustness in DisplayList:
-            if encoding == "utf8":
-                print >> outfile_signatures, "\n=============================================\n", sig, "\n"
-            else:
-                print >> outfile_signatures, "\n=============================================\n", '{0:30s} \n'.format(sig)
-            n = 0
-
-            stemlist = self.SignatureToStems[sig].keys()
-            stemlist.sort()
-            numberofstems = len(stemlist)
-            for stem in stemlist:
-                n += 1
-                print >> outfile_signatures, '{0:12s}'.format(stem),
-                if n == numberofstemsperline:
-                    n = 0
-                    print >> outfile_signatures
-            print >> outfile_signatures, "\n-------------------------"
-            # ------------------- New -----------------------------------------------------------------------------------
-            howmany = 5     
-            print >>outfile_signatures, "Average count of top",howmany, " stems:" , AverageCountOfTopStems(howmany, sig, self.SignatureToStems, self.StemCounts)
-            
-
-            # ------------------------------------------------------------------------------------------------------
-            bitsPerLetter = 5
-            wordlist = makeWordListFromSignature(sig, self.SignatureToStems[sig])
-            (a, b, c) = findWordListInformationContent(wordlist, bitsPerLetter)
-            (d, e, f) = findSignatureInformationContent(self.SignatureToStems, sig, bitsPerLetter)
-            formatstring = '%35s %10d  '
-            formatstringheader = '%35s %10s    %10s  %10s'
-            print >> outfile_signatures, formatstringheader % ("", "Phono", "Ordering", "Total")
-            print >> outfile_signatures, formatstring % ("Letters in words if unanalyzed:", a   )
-            print >> outfile_signatures, formatstring % ("Letters as analyzed:", d)
-            # ------------------------------------------------------------------------------------------------------
-            howmanytopstems = 5
-            
-
-
-            print >> outfile_signatures, "\n-------------------------"
-            print >> outfile_signatures, "Entropy-based stability: ", StableSignature(stemlist,FindSuffixesFlag)
-            print >> outfile_signatures, "\n", "High frequency possible affixes \nNumber of stems: ", len(stemlist)
-            formatstring = '%10s    weight: %5d count: %5d %2s'
-            peripheralchunklist = find_N_highest_weight_affix(stemlist, FindSuffixesFlag)
-
-            for item in peripheralchunklist:
-                if item[2] >= numberofstems * 0.9:
-                    flag = "**"
-                else:
-                    flag = ""
-                print >> outfile_signatures, formatstring % (item[0], item[1], item[2], flag)
-
-                # print WORDS of each signature:
-        if True:
-            words = self.WordToSig.keys()
-            words.sort()
-            print >> outfile_wordstosigs, "***"
-            print >> outfile_wordstosigs, "\n--------------------------------------------------------------"
-            print >> outfile_wordstosigs, "Words and their signatures"
-            print >> outfile_wordstosigs, "--------------------------------------------------------------"
-            maxnumberofsigs = 0
-            ambiguity_counts = dict()
-            for word in self.WordToSig:
-                ambiguity = len(self.WordToSig[word])
-                if ambiguity not in ambiguity_counts:
-                    ambiguity_counts[ambiguity] = 0
-                ambiguity_counts[ambiguity] += 1
-                if len(self.WordToSig[word]) > maxnumberofsigs:
-                    maxnumberofsigs = len(self.WordToSig[word])
-                    #print word, maxnumberofsigs
-            print >> lxalogfile, "How many words have multiple analyses?"
-            print "  How many words have multiple analyses?"
-            for i in range(maxnumberofsigs):
-                if i in ambiguity_counts:
-                    print >> lxalogfile, "{:4d}{:10,d}".format(i, ambiguity_counts[i])
-                    print                "{:4d}{:10,d}".format(i, ambiguity_counts[i])
-     
-
-            wordlist = self.WordToSig.keys()
-            wordlist.sort()
-
-            for word in wordlist:
-                print >> outfile_wordstosigs, '{0:<30}'.format(word), ":",
-                for n in range(len(self.WordToSig[word])):               
-                    sig = MakeStringFromSignature(self.WordToSig[word][n], ColumnWidth)
-                    print >> outfile_wordstosigs, sig + " " * (ColumnWidth - len(sig)),
-                print >> outfile_wordstosigs
-
-     
-        print >>outfile_suffixes,  "--------------------------------------------------------------"
-        print >>outfile_suffixes , "        Suffixes "
-        print >>outfile_suffixes,  "--------------------------------------------------------------"
-        print "  Printing suffixes."
-        suffixlist = list(self.Suffixes.keys())
-        suffixlist.sort(key=lambda  suffix:self.Suffixes[suffix], reverse=True)
-        for suffix in suffixlist:
-            print >>outfile_suffixes,"{:8s}{:9,d}".format(suffix, self.Suffixes[suffix])
-
-
-        stems = self.StemToWord.keys()
-        stems.sort()
-        print >> outfile_stemtowords, "--------------------------------------------------------------"
-        print >> outfile_stemtowords, "---  Stems and their words"
-        print >> outfile_stemtowords, "--------------------------------------------------------------"
-        print "  Printing stems and their words."
-        self.StemCounts = dict()
-        for stem in stems:
-            print >> outfile_stemtowords, '{:15}'.format(stem),
-            wordlist = self.StemToWord[stem].keys()
-            wordlist.sort()
-            stemcount = 0
-            for word in wordlist:
-                stemcount += self.WordCounts[word]
-            self.StemCounts[stem]=stemcount
-            print    >> outfile_stemtowords, '{:5d}'.format(stemcount),'; ',
-            stemcount = float(stemcount)    
-            for word in wordlist:
-                wordcount = self.WordCounts[word]
-                print >> outfile_stemtowords, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
-            print >> outfile_stemtowords
-
-            # We print a list of stems with their words (and frequencies) in which only those suffixes which are among the K most frequent suffixes,
-            # in order to use visualization methods that put soft limits on the number of dimensions they can handle well.
-            
-            threshold_for_top_affixes = 11 # this will give us one more than that number, since we are zero-based counting.
-            top_affixes = suffixlist[0:threshold_for_top_affixes]
-        print >> outfile_stemtowords2, "\n--------------------------------------------------------------"
-        print >> outfile_stemtowords2, "---  Stems and their words with high frequency affixes"
-        print >> outfile_stemtowords2, "--------------------------------------------------------------"
-        print "  Printing stems and their words, but only with high frequency affixes."
-        print >>outfile_stemtowords2, "---\n--- Only signatures with these affixes: ", top_affixes
-        print >>outfile_stemtowords2, "---"
-        self.StemCounts = dict()
-        for stem in stems:
-            signature = self.StemToSignature[stem]
-            for affix in signature:
-                if affix not in top_affixes:
-                    #print stem, signature, affix
-                    continue 
-            print >> outfile_stemtowords2, '{:15}'.format(stem),
-            wordlist = self.StemToWord[stem].keys()
-            wordlist.sort()
-            stemcount = 0
-            for word in wordlist:
-                stemcount += self.WordCounts[word]
-            self.StemCounts[stem]=stemcount
-            print    >> outfile_stemtowords2, '{:5d}'.format(stemcount),'; ',
-            stemcount = float(stemcount)    
-            for word in wordlist:
-                wordcount = self.WordCounts[word]
-                print >> outfile_stemtowords2, '{:15}{:4n} {:7.1%} '.format(word,wordcount, wordcount/stemcount),
-            print >> outfile_stemtowords2        
-            #print top_affixes
-
-
-
-
-
-        print >>outfile_SigExtensions,  "--------------------------------------------------------------"
-        print >>outfile_SigExtensions , "        Signature extensions  "
-        print >>outfile_SigExtensions,  "--------------------------------------------------------------"
-        print "  Printing signature extensions."
-        ListOfAlternations = list()
-        ListOfAlternations2 = list()
-        DictOfAlternations = dict()
-        AlternationDict = dict()
-        count = 0
-        for (sig1,stemcount,robustness)  in  DisplayList:
-             
-            if count > 100:
-                break
-            count += 1
-
-
-            #if count > 10:
-                #print sig1, count
-            #print >>lxalogfile, "897", "sig1", sig1 
-
-            for sig2, count2, robustness2 in DisplayList:
-
-                if len(sig1) != len(sig2) :
-                    continue
-
-                (AlignedList1, AlignedList2, Differences) = Sig1ExtendsSig2(sig2,sig1,lxalogfile)
-                stemcount = len(self.SignatureToStems[sig2])
-
-                
-
-                if  AlignedList1 != None:
-                    print >>outfile_SigExtensions, "{:35s}{:35s}{:35s}".format(AlignedList1, AlignedList2, Differences), 
-                    #Make CAlternation:
-                    this_alternation = CAlternation(stemcount)
-                    for i  in range(len(AlignedList1)):
-                        this_alloform = CAlloform(Differences[i], AlignedList2[i], stemcount)
-                        this_alternation.AddAlloform (this_alloform)
-                    print  >>outfile_SigExtensions, this_alternation.display()
-                    ListOfAlternations.append(this_alternation)
-
-                    if (False):
-                        print >>outfile_SigExtensions, "A", FindSuffixesFlag, "{:35s}{:35s}{:35s}".format(AlignedList1, AlignedList2, Differences)
-                        if len(AlignedList1)==2:
-                            alternation = (Differences[0],  Differences[1])
-                            ListOfAlternations.append((Differences[0], AlignedList2[0], Differences[1], AlignedList2[1]))
-                            if alternation not in DictOfAlternations:
-                                DictOfAlternations[alternation]= list()
-                            DictOfAlternations[alternation].append((Differences[0], AlignedList2[0], Differences[1], AlignedList2[1]))
-
-        ListOfAlternations.sort(key=lambda item:item.Count, reverse=True)
-        for item in ListOfAlternations:
-            if item.Count > 1:
-                print >>outfile_SigExtensions, item.display()
-
-        print >>outfile_SigExtensions, "*"*50
-        print >>outfile_SigExtensions, "*"*50
-
-
-        ListOfAlternations.sort(key=lambda item:item.Alloforms[0].Form)
-        for item in ListOfAlternations:
-            if item.Count > 1:
-                print >>outfile_SigExtensions, item.Alloforms[0].Form, item.display()
-
-
-        outfile_SigExtensions.flush()
-
-        return
-
-
-
-
-
-
-
-
+        # print WORDS of each signature:
+        print_words(outfile_wordstosigs, lxalogfile, self.WordToSig,ColumnWidth )  
+ 
+        # print signature extensions:
+        print_signature_extensions(outfile_SigExtensions, lxalogfile, DisplayList, self.SignatureToStems)  
+ 
 
 ## -------                                                      ------- #
 ##              Utility functions                               ------- #
@@ -968,42 +694,6 @@ class CLexicon:
             self.TotalRobustnessInSignatures +=  getrobustness(mystems,sig)
             self.AffixLettersInSignatures += AffixListLetterLength
     
-    def StemsToSignatures(self,FindSuffixesFlag):
-        if FindSuffixesFlag:
-            Affixes = self.Suffixes
-        else:
-            Affixes = self.Prefixes
-
-        #  Iterate through each stem, get its affixes and count them, and create signatures. 
-        for stem in self.StemToWord:
-            self.LettersInStems += len(stem)
-            signature = list(self.StemToAffix[stem])
-            signature.sort()
-            signature_tuple = tuple(signature)
-            for affix in signature:
-                if affix not in Affixes:
-                    Affixes[affix] = 0
-                Affixes[affix] += 1
-            if signature_tuple not in self.SignatureToStems:
-                self.SignatureToStems[signature_tuple] = dict()
-                for affix in signature:
-                    self.TotalLetterCostOfAffixesInSignatures += len(affix)
-            self.SignatureToStems[signature_tuple][stem] = 1
-            self.StemToSignature[stem] = signature_tuple
-            for word in self.StemToWord[stem]:
-                if word not in self.WordToSig:
-                    self.WordToSig[word] = list()
-                self.WordToSig[word].append(signature_tuple)
-        for sig in self.SignatureToStems:           
-            if len(self.SignatureToStems[sig]) < self.MinimumStemsInaSignature:
-                for stem in self.SignatureToStems[sig]:
-                    del self.StemToSignature[stem]
-                    for word in self.StemToWord[stem]:
-                        if len( self.WordToSig[word] ) == 1:                     
-                            del self.WordToSig[word]
-                        else:
-                            self.WordToSig[word].remove(sig)
-                    del self.StemToWord[stem]
 
 class Word:
     def __init__(self, key):
@@ -1112,182 +802,6 @@ class ParseChain:
                 returnstring += str(chunk.edge.toState.index) + "-"
         return returnstring
 
-        # ----------------------------------------------------------------------------------------------------------------------------#
-class CAlternation:
-    def __init__(self, stemcount = 0):
-        self.Alloforms = list() # list of CAlloforms
-        self.Count = stemcount
-        
-    def AddAlloform(self, this_alloform):
-            self.Alloforms.append(this_alloform)
-
-    def MakeProseReportLine(self):
-        ReportLine = CProseReportLine()
-
-
-        return ReportLine.MakeReport( )
-
-
-    def display(self):
-        this_datagroup = CDataGroup("KeyAndList",self.Count)         
-        for i in range(len(self.Alloforms)):
-            alloform = self.Alloforms[i]
-            this_datagroup.Count = self.Count
-            if alloform.Form ==  "":
-                key = "nil" 
-            else:
-                key = alloform.Form
-            if key not in this_datagroup.MyKeyDict:
-                this_datagroup.MyKeyDict[key]=list()
-            this_datagroup.MyKeyDict[key].append(alloform.Context)
-         
-        return this_datagroup.display()
-
- #       for i in range(len(self.Alloforms)):
- #         
-
-#            return_string = ""
-#            alloform = self.Alloforms[i]
-#            if alloform.Form ==  "":
-#                key = "nil" 
-#            else:
-#                key = alloform.Form
-#            this_datagroup.MyListOfKeys.append(key)
-#            this_datagroup.MyKeyDict[key]##
-
-#            return_string += key
-#            return_string += " in context: "
-#            return_string += alloform.Context
-            
-#            return_list.append(return_string) 
-#        return return_list
-
-    def prose_statement(self):
-        alloform_dict=dict()
-        alloform_list=list()
-        elsewhere_case=None
-        for alloform in self.Alloforms:
-            print "G",   alloform.Form, alloform.Context
-            key = alloform.Form
-            if key not in alloform_dict:
-                alloform_dict[key] = list()
-            alloform_dict[key].append(alloform)
-            if alloform.Context == "NULL":
-                elsewherecase_form = alloform.Form
-        number_of_alloforms= len(alloform_dict)
-
-        for item in alloform_dict:
-            temp_alloform = CAlloform(item, "", 0)
-            alloform_list.append(alloform_dict[item])
-            print "W", item, alloform_dict[item]
-            for subitem in item:
-                temp_alloform.Context += " "+subitem.Context
-
-
-        return_string = ""
-        for alloform_no in range(number_of_alloforms):
-            thisreportline = CReportLine()
-
-            #alloform_list[alloform_no] is a  list of alloforms, all with the same Key
-            key = alloform_list[alloform_no][0].Key # take the Key from the first one, because they are all the same
-
-            context_list = list()
-            for n in range(len(alloform_list[alloform_no])):
-
-                context_list.append(alloform_list[alloform_no].context)  
-            return_string += key + ":".join(context_list)    
-        return return_string            
-
-class CAlloform:
-    def __init__(self,form, context, stemcount):
-        self.Form = form
-        self.Context = context
-        self.StemCount = stemcount
-
-class CProseReportLine:
-    def __init__(self):
-        self.MyList = list()
-        self.MyLastItem = None
-
-    def MakeReport(self):
-        returnstring="hello!"
-        for item in self.MyList:
-            returnstring += item.MyHead
-            for item2 in self.MyTail:
-                returnstring += " " + item2
-        if self.MyLastItem:
-            returnstring += item.MyHead
-            for item2 in self.MyTail:
-                returnstring += " " + item2  
-        return returnstring         
-
-
-class CReportLineItem:
-    def __init__(self):        
-        self.MyHead = NULL
-        self.MyTail = NULL
-
-class CDataGroup:
-    def __init__(self, type,count):
-        self.Type = type
-        self.MyKeyDict = dict()
-        self.Count = count
-
-
-    def display(self):
-        colwidth1 = 20
-        colwidth2 = 40
-        countstring = str(self.Count)
-        returnstring = countstring + " "*(4-len(countstring))
-        string1 = ""
-        string2 =""
-
-        ItemList = list(self.MyKeyDict.keys())
-        #if there is a word-finally, put it in last place
-
-
-        for i in range(len(ItemList)):
-            phone = ItemList[i]
-            if "\#" in self.MyKeyDict[phone]:
-                #word final phoneme
-                word_final_phone = ItemList[i]
-                del ItemList[i]
-                ItemList.append(word_final_phone)
-        #if there is a "NIL", then put it in first place.
-        for i in range(len(ItemList)):
-            phone=ItemList[i]
-            if phone== "nil":
-                del ItemList[i]
-                ItemList.insert(0,"nil")
-
-
-
-        if self.Type == "KeyAndList":
-            for key in ItemList:
-                NULL_flag = False
-                string1 = "[" + key + "]" 
-                string2 = ""
-                returnstring += string1 + " "*(colwidth1-len(string1))
-               
-                FirstItemFlag= True
-                for item in self.MyKeyDict[key]:
-                    if item == "NULL":
-                        NULL_flag = True
-                        continue
-                    if FirstItemFlag:
-                        string2 += "before " 
-                        FirstItemFlag = False
-                    string2 += "/"+item + "/ "
-                if NULL_flag:
-                    if FirstItemFlag == False:
-                        string2 += "and word-finally."
-                    else:
-                        string2 += "word-finally."
-                returnstring += string2 + " "*(colwidth2- len(string2))
-
-                     
-             
-        return returnstring
 
 
 
@@ -1297,32 +811,7 @@ def RemakeSignatures(WordToSig, SignatureToStems, StemToWord, StemToAffix, StemT
     return ""
 
 
-# ----------------------------------------------------------------------------------------------------------------------------#
-def StableSignature(stemlist,MakeSuffixesFlag):
-    # ----------------------------------------------------------------------------------------------------------------------------#
-    """Determines if this signature is prima facie plausible, based on letter entropy.
-       If this value is above 1.5, then it is a stable signature: the number of different letters
-       that precede it is sufficiently great to have confidence in this morpheme break."""
 
-    entropy = 0.0
-    frequency = dict()
-    templist = list()
-    if MakeSuffixesFlag == False:
-        for chunk in stemlist:
-            templist.append(chunk[::-1])
-        stemlist = templist     
-    for stem in stemlist:
-        lastletter = stem[-1]
-        if lastletter not in frequency:
-            frequency[lastletter] = 1.0
-        else:
-            frequency[lastletter] += 1.0
-    for letter in frequency:
-        frequency[letter] = frequency[letter] / len(stemlist)
-        entropy += -1.0 * frequency[letter] * math.log(frequency[letter], 2)
-    return entropy
-
- 
 
 
 # ----------------------------------------------------------------------------------------------------------------------------#
@@ -1387,25 +876,6 @@ def TestForCommonEdge(stemlist, outfile,  threshold, FindSuffixesFlag):
  
 
 
-# ----------------------------------------------------------------------------------------------------------------------------#
-def AverageCountOfTopStems(howmany, sig, Signatures, StemCounts):
-	stemlist = list(Signatures[sig])
-	countlist = []
-	count = 0
-	average = 0
-	for stem in stemlist:
-		countlist.append(StemCounts[stem])
-	countlist = sorted(countlist, reverse=True)
-	if len(countlist) < howmany:
-		howmany = len(countlist)
-	for n in range(howmany):
-		average += countlist[n]
-	average = average / howmany
-	return average
-
-
-
-
 
 
 
@@ -1428,61 +898,6 @@ def getrobustness(sig, stems):
 
 
 # ----------------------------------------------------------------------------------------------------------------------------#
-# ---------------------------------------------------------#
-def makeWordListFromSignature(signature, stemset):
-	wordlist = list()
-	word = ""
-	for stem in stemset:
-		for affix in signature:
-			if affix == "NULL":
-				word = stem
-			else:
-				word = stem + affix
-		wordlist.append(word)
-	return wordlist
-
-
-
-# ---------------------------------------------------------#
-
-def findWordListInformationContent(wordlist, bitsPerLetter):
-	phonoInformation = 0
-	orderingInformation = 0
-	letters = 0
-	for word  in wordlist:
-		wordlength = len(word)
-		letters += wordlength
-		phonoInformation += bitsPerLetter * wordlength
-		orderingInformation += wordlength * (wordlength - 1) / 2
-	return (letters, phonoInformation, orderingInformation)
-
-
-# ---------------------------------------------------------#
-def findSignatureInformationContent(signatures, signature, bitsPerLetter):
-	stemSetPhonoInformation = 0
-	stemSetOrderingInformation = 0
-	affixPhonoInformation = 0
-	affixOrderingInformation = 0
-	letters = 0
-	stemset = signatures[signature]
-	for stem in stemset:
-		stemlength = len(stem)
-		letters += stemlength
-		stemSetPhonoInformation += bitsPerLetter * stemlength
-		stemSetOrderingInformation += math.log(stemlength * (stemlength - 1) / 2, 2)
-	for affix in signature:
-		affixlength = len(affix)
-		letters += affixlength
-		affixPhonoInformation += bitsPerLetter * len(affix)
-		if affixlength > 1:
-			affixOrderingInformation += math.log(affixlength * (affixlength - 1) / 2, 2)
-		else:
-			affixOrderingInformation = 0
-	phonoInformation = int(stemSetPhonoInformation + affixPhonoInformation)
-	orderingInformation = int(stemSetOrderingInformation + affixOrderingInformation)
-	return (letters, phonoInformation, orderingInformation)
-
-
 
 # ---------------------------------------------------------#
 def FindSignature_LetterCountSavings(Signatures, sig):
@@ -1498,64 +913,9 @@ def FindSignature_LetterCountSavings(Signatures, sig):
 	return lettercountsavings
 
 # ----------------------------------------------------------------------------------------------------------------------------#
-def find_N_highest_weight_affix(wordlist, FindSuffixesFlag):
-	# ----------------------------------------------------------------------------------------------------------------------------#
-
-	maximalchunksize = 6  # should be 3 or 4 ***********************************
-	totalweight = 0
-	# threshold 		= 50
-	weightthreshold = 0.02
-	# permittedexceptions 	= 2
-	MinimalCount = 10
-	chunkcounts = {}
-	chunkweights = {}
-	chunkweightlist = []
-	tempdict = {}
-	templist = []
-	for word in wordlist:
-		totalweight += len(word)
-
-	if FindSuffixesFlag:
-		for word in wordlist:
-			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the suffix being considered
-				chunk = word[-1 * width:]
-				if not chunk in chunkcounts.keys():
-					chunkcounts[chunk] = 1
-				else:
-					chunkcounts[chunk] += 1
-	else:
-		for word in wordlist:
-			for width in range(1, maximalchunksize + 1):  # width is the size (in letters) of the prefix being considered
-				chunk = word[:width]
-				if not chunk in chunkcounts.keys():
-					chunkcounts[chunk] = 1
-				else:
-					chunkcounts[chunk] += 1
-	for chunk in chunkcounts.keys():
-		chunkweights[chunk] = chunkcounts[chunk] * len(chunk)
-		if chunkweights[chunk] < weightthreshold * totalweight:
-			continue
-		if chunkcounts[chunk] < MinimalCount:
-			continue
-		tempdict[chunk] = chunkweights[chunk]
-
-	templist = sorted(tempdict.items(), key=lambda chunk: chunk[1], reverse=True)
-	for stem, weight in templist:
-		chunkweightlist.append((stem, weight, chunkcounts[stem]))
-
-	# ----------------------------------------------------------------------------------------------------------------------------#
-	return chunkweightlist
-
-
-# ----------------------------------------------------------------------------------------------------------------------------#
  
 # --
 # ----------------------------------------------------------------------------------------------------------------------------#
-def MakeStringFromSignature(sigset, maxlength):
-	sig = "-".join(list(sigset))
-	if len(sig) >  maxlength-2:
-		sig = sig[:maxlength-5] + "..."
-	return sig
 
 def MakeStringFromAlternation(s1,s2,s3,s4):
 	if s1== "":
