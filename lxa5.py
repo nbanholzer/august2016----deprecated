@@ -41,7 +41,7 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=50000
+numberofwords 	=100000
 
 NumberOfCorrections = 10
   

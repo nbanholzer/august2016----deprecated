@@ -274,9 +274,9 @@ class CLexicon:
             # Creates Lexicon.StemToWord, Lexicon.StemToAffix. 
             column_no = 0
             print 
-            print formatstring2.format("ii. Reanalyzing words, finding both stems and affixes.")
+            print formatstring2.format("ii.  Reanalyzing words, finding both stems and affixes.")
             if True:
-                print " "*11 + "Word number:",
+                print " "*12 + "Word number:",
                 for i in range(len(self.WordList.mylist)): 
                     if i % 2500 == 0:
                         print "{:7,d}".format(i),           
@@ -337,42 +337,44 @@ class CLexicon:
 
 
             print "       iii. Finding a set of signatures."
-
-            StemsToEliminate = list()
-            for stem in self.StemToWord:
-                self.LettersInStems += len(stem)
-                signature = list(self.StemToAffix[stem])
-                signature.sort()
-                #if stem == "abandon":
-                #    print stem, signature
-                signature_tuple = tuple(signature)
-                if len(signature) == 1:
-                    StemsToEliminate.append(stem)
-                    continue
-                if signature_tuple not in self.SignatureToStems:
-                    self.SignatureToStems[signature_tuple] = dict()
+            self.StemsToSignatures(FindSuffixesFlag)
+            if (False):
+                StemsToEliminate = list()
+                for stem in self.StemToWord:
+                    self.LettersInStems += len(stem)
+                    signature = list(self.StemToAffix[stem])
+                    signature.sort()
+                    signature_tuple = tuple(signature)
+                    if len(signature) == 1:
+                        StemsToEliminate.append(stem)
+                        continue
+                    if signature_tuple not in self.SignatureToStems:
+                        self.SignatureToStems[signature_tuple] = dict()
                     for affix in signature:
                         self.TotalLetterCostOfAffixesInSignatures += len(affix)
                         if affix not in Affixes:
                             Affixes[affix]=1
                         else:
                             Affixes[affix] +=1
-                self.SignatureToStems[signature_tuple][stem] = 1
+                    self.SignatureToStems[signature_tuple][stem] = 1
+                    self.StemToSignature[stem] = signature_tuple
+                    for word in self.StemToWord[stem]:
+                        if word not in self.WordToSig:
+                            self.WordToSig[word] = list()
+                        self.WordToSig[word].append(signature_tuple)
+                        self.LettersInAnalyzedWords += len(word)
+                for stem in StemsToEliminate:
+                    del self.StemToAffix[stem]
+                    del self.StemToWord[stem]
 
-                self.StemToSig[stem] = signature_tuple
-                for word in self.StemToWord[stem]:
-                    if word not in self.WordToSig:
-                        self.WordToSig[word] = list()
-                    self.WordToSig[word].append(signature_tuple)
-                    self.LettersInAnalyzedWords += len(word)
 
-            for stem in StemsToEliminate:
-                del self.StemToAffix[stem]
-                del self.StemToWord[stem]
 
-            print formatstring1.format("iv. Signatures.", len(self.SignatureToStems)) 
-            print formatstring2.format("v. Finished redoing structure")
-            print >>outfile, formatstring2.format("v. Finished redoing structure\n")
+
+
+
+            print  " "* 6, "iv.  Signatures (count): ", len(self.SignatureToStems) 
+            print formatstring2.format("v.  Finished redoing structure")
+            print >>outfile, formatstring2.format("iv.  Finished redoing structure\n")
             print >>outfile, "Number of sigs: ", len(self.SignatureToStems)
                      
              
