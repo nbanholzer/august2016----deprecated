@@ -45,7 +45,7 @@ def print_signature_list_1(this_file, DisplayList,stemcountcutoff, totalrobustne
             robustnessproportion = float(robustness) / totalrobustness
             runningsumproportion = runningsum/totalrobustness
             print >> this_file, formatstring2.format(sig, stemcount, robustness,robustnessproportion, runningsumproportion )
-        print >> this_file, "-"*60
+    print >> this_file, "-"*60
 # ----------------------------------------------------------------------------------------------------------------------------#
 def print_signature_list_2(this_file, DisplayList,stemcountcutoff, totalrobustness, SignatureToStems, StemCounts, suffix_flag):
     numberofstemsperline = 6
@@ -140,7 +140,7 @@ def print_stems(outfile1, outfile2, StemToWord, StemToSignature, WordCounts, suf
             # We print a list of stems with their words (and frequencies) in which only those suffixes which are among the K most frequent suffixes,
             # in order to use visualization methods that put soft limits on the number of dimensions they can handle well.
             
-            threshold_for_top_affixes = 11 # this will give us one more than that number, since we are zero-based counting.
+            threshold_for_top_affixes = 25 # this will give us one more than that number, since we are zero-based counting.
             top_affixes = suffixlist[0:threshold_for_top_affixes]
         print >> outfile2, "\n--------------------------------------------------------------"
         print >> outfile2, "---  Stems and their words with high frequency affixes"

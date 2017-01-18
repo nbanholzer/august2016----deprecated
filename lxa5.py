@@ -41,20 +41,20 @@ BreakAtHyphensFlag = True
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=1000000
+numberofwords 	=50000
 
 NumberOfCorrections = 10
   
 language="english"
-language="english-encarta"
+#language="english-encarta"
 #language="german"
 #language="swahili"
 #language="french"
 #language="latin"
 
-shortfilename = "english-encarta"
+#shortfilename = "english-encarta"
 #shortfilename = "german"
-#shortfilename="browncorpus"
+shortfilename="browncorpus"
 #shortfilename="swahili"
 #shortfilename = "encarta_french_UTF8"
 #shortfilename="bible"

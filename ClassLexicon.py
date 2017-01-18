@@ -67,7 +67,7 @@ class CLexicon:
         self.Suffixes={}
         self.Prefixes = {}
         self.MinimumStemsInaSignature =2
-        self.MinimumStemLength = 5
+        self.MinimumStemLength = 3
         self.MaximumAffixLength =3
         self.MaximumNumberOfAffixesInASignature = 10
         self.NumberOfAnalyzedWords = 0
@@ -525,7 +525,6 @@ class CLexicon:
                     print >>outfile, "       Too few stems to shift material from suffixes", sigstring, numberofstems       
                     continue
                 print >>outfile, "{:20s} count: {:4d} ".format(sigstring,   numberofstems),
-
                 shiftingchunk, shiftingchunkcount  = TestForCommonEdge(self.SignatureToStems[sig], outfile, threshold, FindSuffixesFlag) 
 
                 if shiftingchunkcount > 0:
@@ -838,7 +837,6 @@ def TestForCommonEdge(stemlist, outfile,  threshold, FindSuffixesFlag):
     FinalLetterCount = {}
     NumberOfStems = len(stemlist) 
     WinningStringCount = dict() #key is string, value is number of stems
-     
     for length in range(1,MaximumLengthToExplore):
         FinalLetterCount = dict()
         for stem in stemlist:            
@@ -852,20 +850,16 @@ def TestForCommonEdge(stemlist, outfile,  threshold, FindSuffixesFlag):
                 FinalLetterCount[commonstring] = 1
             else:
                 FinalLetterCount[commonstring] += 1
-            #print stem,            
-        
+        if len(FinalLetterCount) == 0:  # this will happen if all of the stems are of the same length and too short to do this.
+            continue
         sorteditems = sorted(FinalLetterCount, key=FinalLetterCount.get, reverse=True)  # sort by value
         CommonLastString = sorteditems[0]
         CommonLastStringCount = FinalLetterCount[CommonLastString]
         WinningStringCount[CommonLastString]=CommonLastStringCount
         
-        #print >>outfile,  "    ", "\nA", length,  CommonLastString, CommonLastStringCount, "Number Of Stems" , NumberOfStems
         if  CommonLastStringCount >= threshold * NumberOfStems:
             Winner = CommonLastString
             WinningStringCount[Winner]=CommonLastStringCount
-            #print  "A", " length" , length, "best string" ,   CommonLastString, CommonLastStringCount, "Number Of Stems" , NumberOfStems
-            #print "    ", "B", length,  CommonLastString, CommonLastStringCount, "Number Of Stems" , NumberOfStems
-            #print "\nB winner so far", Winner
             continue
 
         else:
@@ -879,7 +873,6 @@ def TestForCommonEdge(stemlist, outfile,  threshold, FindSuffixesFlag):
          
         
     # ----------------------------------------------------------------------------------------------------------------------------#
-    #print "\n\n", WinningString, WinningCount  
     return (WinningString, WinningCount )
 
 
