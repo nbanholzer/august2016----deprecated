@@ -173,22 +173,22 @@ class CLexicon:
             self.LettersInStems += len(stem)
             signature = list(self.StemToAffix[stem])
             signature.sort()
-            signature_tuple = tuple(signature)
+            signature_string = "-".join(signature)
             for affix in signature:
                 if affix not in Affixes:
                     Affixes[affix] = 0
                 Affixes[affix] += 1
-            if signature_tuple not in self.SignatureToStems:
-                self.SignatureToStems[signature_tuple] = dict()
+            if signature_string not in self.SignatureToStems:
+                self.SignatureToStems[signature_string] = dict()
                 for affix in signature:
                     self.TotalLetterCostOfAffixesInSignatures += len(affix)
-            self.SignatureToStems[signature_tuple][stem] = 1
-            self.StemToSignature[stem] = signature_tuple
+            self.SignatureToStems[signature_string][stem] = 1
+            self.StemToSignature[stem] = signature_string
             for word in self.StemToWord[stem]:
                 if word not in self.WordToSig:
                     self.WordToSig[word] = list()
-                self.WordToSig[word].append(signature_tuple)
-        for sig in self.SignatureToStems:           
+                self.WordToSig[word].append(signature_string)
+        for sig in self.SignatureToStems: 
             if len(self.SignatureToStems[sig]) < self.MinimumStemsInaSignature:
                 for stem in self.SignatureToStems[sig]:
                     del self.StemToSignature[stem]
@@ -322,10 +322,10 @@ class CLexicon:
             self.TotalLetterCostOfAffixesInSignatures =0         
 
 
-
+            # --------------------------------------------------------------------
             if (False):
                 for stem in self.StemToAffix:
-                    if len(StemToAffix[stem]) > self.MaximumNumberOfAffixesInASignature: 
+                    if len(self.StemToAffix[stem]) > self.MaximumNumberOfAffixesInASignature: 
                         for sig in self.SignatureToStems:
                             stems = self.SignatureToStems[sig]
                             newsig = list()
@@ -335,43 +335,11 @@ class CLexicon:
                                         newsig.append(affix)
                      
 
-
+            # --------------------------------------------------------------------
             print "       iii. Finding a set of signatures."
             self.StemsToSignatures(FindSuffixesFlag)
-            if (False):
-                StemsToEliminate = list()
-                for stem in self.StemToWord:
-                    self.LettersInStems += len(stem)
-                    signature = list(self.StemToAffix[stem])
-                    signature.sort()
-                    signature_tuple = tuple(signature)
-                    if len(signature) == 1:
-                        StemsToEliminate.append(stem)
-                        continue
-                    if signature_tuple not in self.SignatureToStems:
-                        self.SignatureToStems[signature_tuple] = dict()
-                    for affix in signature:
-                        self.TotalLetterCostOfAffixesInSignatures += len(affix)
-                        if affix not in Affixes:
-                            Affixes[affix]=1
-                        else:
-                            Affixes[affix] +=1
-                    self.SignatureToStems[signature_tuple][stem] = 1
-                    self.StemToSignature[stem] = signature_tuple
-                    for word in self.StemToWord[stem]:
-                        if word not in self.WordToSig:
-                            self.WordToSig[word] = list()
-                        self.WordToSig[word].append(signature_tuple)
-                        self.LettersInAnalyzedWords += len(word)
-                for stem in StemsToEliminate:
-                    del self.StemToAffix[stem]
-                    del self.StemToWord[stem]
 
-
-
-
-
-
+            # Print output --------------------------------------------------------
             print  " "* 6, "iv.  Signatures (count): ", len(self.SignatureToStems) 
             print formatstring2.format("v.  Finished redoing structure")
             print >>outfile, formatstring2.format("iv.  Finished redoing structure\n")
@@ -609,6 +577,7 @@ class CLexicon:
 
         DisplayList = []
         for sig, stems in SortedListOfSignatures:
+            #print "486 ", sig
             if len(stems) < stemcountcutoff:
                 continue;
             DisplayList.append((sig, len(stems), getrobustness(sig, stems)))
@@ -631,9 +600,10 @@ class CLexicon:
         initialize_files(self, lxalogfile,singleton_signatures,doubleton_signatures,DisplayList ) 
         initialize_files(self, "console",singleton_signatures,doubleton_signatures,DisplayList ) 
 
-        for sig, stemcount, robustness in DisplayList:
-            if len(self.SignatureToStems[sig]) > 5:
-                self.Multinomial(sig,FindSuffixesFlag)
+        if False:
+            for sig, stemcount, robustness in DisplayList:
+                if len(self.SignatureToStems[sig]) > 5:
+                    self.Multinomial(sig,FindSuffixesFlag)
      
         # Print signatures (not their stems) sorted by robustness
         print_signature_list_1(outfile_signatures, DisplayList, stemcountcutoff,totalrobustness)
@@ -728,13 +698,13 @@ def byWordKey(word):
 class CSignature:
     count = 0
 
-    def __init__(self):
+    def __init__(self, signature_string):
         self.Index = 0
-        self.Affixes = tuple()
+        self.Affixes = tuple(signature_string.split("-"))
         self.StartStateIndex = CSignature.count
         self.MiddleStateIndex = CSignature.Count + 1
         self.EndStateIndex = CSignature.count + 2
-        CSignature.count += 3
+        self.count += 3
         self.StemCount = 1
 
     def Display(self):
