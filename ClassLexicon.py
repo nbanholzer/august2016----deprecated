@@ -2,7 +2,7 @@ import sys
 import math
 from signaturefunctions import *
 from printing_to_files import *
-
+ 
 # This is just part of documentation:
 # A signature is a tuple of strings (each an affix).
 # Signatures is a map: its keys are signatures.  Its values are *sets* of stems.
@@ -57,7 +57,7 @@ class CLexicon:
         self.WordList = CWordList()
         self.WordCounts = dict()
 
-        self.Signatures = {}
+        self.Signatures = {}        #not currently used...
         self.SignatureToStems = {}
         self.WordToSig = {}
         self.StemToWord = {}
@@ -68,7 +68,7 @@ class CLexicon:
         self.Prefixes = {}
         self.MinimumStemsInaSignature =2
         self.MinimumStemLength = 3
-        self.MaximumAffixLength =3
+        self.MaximumAffixLength =4
         self.MaximumNumberOfAffixesInASignature = 10
         self.NumberOfAnalyzedWords = 0
         self.LettersInAnalyzedWords = 0
@@ -351,7 +351,9 @@ class CLexicon:
 
 
 #-----------------------------------------------------------------------------------------------------------------------------#
-    def FindProtostems(self, wordlist, Protostems,minimum_stem_length,FindSuffixesFlag):
+    def FindProtostems(self, wordlist, Protostems,minimum_stem_length, FindSuffixesFlag ,maximum_stem_length = -1):
+            # A "maximum_stem_length" is included here so that we can use this function to explore
+            # for stems shorter than the minimum that was assumed on an earlier iteration.
             previousword = ""
             if FindSuffixesFlag:
                 for i in range(len(wordlist)):
@@ -360,7 +362,10 @@ class CLexicon:
                     if previousword == "":  # only on first iteration
                         previousword = word
                         continue
-                    span = min(len(word), len(previousword))
+                    if maximum_stem_length > 0:
+                        span = min(len(word), len(previousword), maximum_stem_length)
+                    else:
+                        span = min(len(word), len(previousword))
                     for i in range(span):
                         if word[i] != previousword[i]: #will a stem be found in the very first word?
                             differencefoundflag = True
@@ -605,6 +610,8 @@ class CLexicon:
                 if len(self.SignatureToStems[sig]) > 5:
                     self.Multinomial(sig,FindSuffixesFlag)
      
+ 
+
         # Print signatures (not their stems) sorted by robustness
         print_signature_list_1(outfile_signatures, DisplayList, stemcountcutoff,totalrobustness)
 
@@ -706,6 +713,8 @@ class CSignature:
         self.EndStateIndex = CSignature.count + 2
         self.count += 3
         self.StemCount = 1
+        self.LetterSize = len(signature_string) - len(self.Affixes)
+        print "710 ", signature_string, self.LetterSize
 
     def Display(self):
         returnstring = ""
