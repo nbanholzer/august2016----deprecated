@@ -1,6 +1,30 @@
 import math 
 from signaturefunctions import *
 from class_alternation import *
+
+
+def initialize_files1(this_lexicon, this_file,language ):
+    formatstring_initfiles1 = "{:40s}{:>15d}"
+    formatstring_initfiles2 = "{:40s}{:>15s}"
+    formatstring_initfiles3 = "{:40s}{:15.2f}"
+    if this_file == "console":
+        print formatstring_initfiles2.format("Language: ", language)
+        print formatstring_initfiles1.format("Total words:", len(this_lexicon.WordList.mylist))
+        print formatstring_initfiles1.format("Minimum Stem Length", this_lexicon.MinimumStemLength)
+        print formatstring_initfiles1.format("Maximum Affix Length", this_lexicon.MaximumAffixLength )
+        print formatstring_initfiles1.format("Minimum Number of stems in signature: ", this_lexicon.MinimumStemsInaSignature)
+        print formatstring_initfiles1.format("Total letter count in words: ", this_lexicon.TotalLetterCountInWords)
+        print formatstring_initfiles3.format("Average letters per word: ",3.0) #(float(this_lexicon.TotalLetterCountInWords))/len(this_lexicon.WordList.mylist))
+    else:
+        print >>this_file, "{:40s}{:>15s}".format("Language: ", language)
+        print >>this_file, "{:40s}{:10,d}".format("Total words:", len(this_lexicon.WordList.mylist))
+        print >>this_file, "{:40s}{:>10,}".format("Minimum Stem Length", this_lexicon.MinimumStemLength)
+        print >>this_file, "{:40s}{:>10,}".format("Maximum Affix Length", this_lexicon.MaximumAffixLength )
+        print >>this_file, "{:40s}{:>10,}".format("Minimum Number of stems in signature: ", this_lexicon.MinimumStemsInaSignature)
+        print >>this_file, "{:40s}{:10,d}".format("Total letter count in words: ", this_lexicon.TotalLetterCountInWords)
+        print >>this_file, "{:40s}{:10.2f}".format("Average letters per word: ",  float(this_lexicon.TotalLetterCountInWords)/len(this_lexicon.WordList.mylist))
+
+# ----------------------------------------------------------------------------------------------------------------------------# 
 # ----------------------------------------------------------------------------------------------------------------------------#
 def initialize_files(this_lexicon, this_file,singleton_signatures,doubleton_signatures, DisplayList ):
     formatstring_console = "   {:45s}{:10,d}"

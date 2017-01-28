@@ -1,11 +1,13 @@
 # -*- coding: <utf-16> -*- 
 unicode = True
+import sys
 import codecs
 import pygraphviz as pgv
-#import marisa_trie
 import argparse
 from ClassLexicon import *
 import os.path
+from loose_fit import *
+
  
 # This program looks for extended signatures, which are regular subgraphs among words, where the edges are
 # (high-freq) Delta-Right pairs of words, and where a word may be *split differently* (without penalty!) 
@@ -34,54 +36,49 @@ from fsa import *
 #		user modified variables
 #--------------------------------------------------------------------##
 
+language = ""
+wordcount = 0
+shortfilename = ""
+NumberOfCorrections = 0
+FindSuffixesFlag=True	
 
+parser = argparse.ArgumentParser(description='Compute morphological analysis.')
+parser.add_argument('-l', action="store", dest= "language", help = "name of language")
+parser.add_argument('-w', action="store", dest= "wordcount", help = "number of words to read", default = 5000)
+parser.add_argument('-f', action="store", dest= "filename", help = "name of file to read", default="defaultfilename")
+parser.add_argument('-c', action="store", dest= "corrections", help = "number of corrections to make",default=0)
+
+results = parser.parse_args()
+language = results.language
+numberofwords	 = results.wordcount
+shortfilename = results.filename
+NumberOfCorrections = results.corrections 
+
+
+ 
 g_encoding =  "asci"  # "utf8"
-#g_encoding =   "utf-8" 
 BreakAtHyphensFlag = True 
 
 #----------------- command line parameters ------------------------------#
 
-numberofwords 	=100000
+#if language == "":
+#        readconfig file
 
-NumberOfCorrections = 10
   
-language="english"
-#language="english-encarta"
-#language="german"
-#language="swahili"
-#language="french"
-#language="latin"
 
-#shortfilename = "english-encarta"
-#shortfilename = "german"
-shortfilename="browncorpus"
-#shortfilename="swahili"
-#shortfilename = "encarta_french_UTF8"
-#shortfilename="bible"
-
-print ("language" , language)
-#-----------------------------------------------------------------------#
  
- 
-
-#-----------------------------------------------------------------------#
- 
-
-FindSuffixesFlag=True	
-
-
 
 
 datafolder 				= "../../data/" + language + "/"
-outfolder     			= datafolder    + "lxa/"
+outfolder     			        = datafolder    + "lxa/"
 infolder 				= datafolder    + 'dx1/'	
 
 graphicsfolder= outfolder + "graphics/"
 if not os.path.exists(graphicsfolder):
 	os.makedirs(graphicsfolder)
 
-infilename 						= infolder  + shortfilename + ".dx1"
-stemfilename 					= infolder  + shortfilename + "_stems.txt"
+infilename 				= infolder  + shortfilename + ".dx1"
+stemfilename 				= infolder  + shortfilename + "_stems.txt"
 outfile_Signatures_name 		= outfolder + shortfilename + "_Signatures.txt"  
 outfile_SigTransforms_name 		= outfolder + shortfilename + "_sigtransforms.txt"
 outfile_SigExtensions_name 		= outfolder + shortfilename + "_sigextensions.txt"
@@ -95,55 +92,57 @@ outfile_wordparses_name 		= outfolder + shortfilename + "_WordParses.txt"
 outfile_wordlist_name 			= outfolder + shortfilename + "_WordList.txt"
 outfile_wordcount_name 			= outfolder + shortfilename + "_WordCounts.txt"
 outfile_suffix_name 			= outfolder + shortfilename + "_suffixes.txt"
-outfile_rebalancing_name 			= outfolder + shortfilename + "_rebalancing_signatures.txt"
+outfile_rebalancing_name 		= outfolder + shortfilename + "_rebalancing_signatures.txt"
 #outfile_FSA_graphics_name		= graphicsfolder + shortfilename + "_FSA_graphics.png"
  
+
+
+
+formatstring_initial_1 = "{:40s}{:>15s}"
 print "\n\n" + "-"*100 
+print ("language" , language)
 if FindSuffixesFlag:
 	print "Finding suffixes." 
 else:
 	print "Finding prefixes." 
-print  "{:40s}{:>15s}".format("Reading dx file: ", infilename)
-print  "{:40s}{:>15s}".format("Logging to: ", outfile_log_name)
+print  formatstring_initial_1.format("Reading dx file: ", infilename)
+print  formatstring_initial_1.format("Logging to: ", outfile_log_name)
 print "-"* 100 
 lxalogfile = open(outfile_log_name, "w")
  
-
-if len(sys.argv) > 1:
-	print sys.argv[1]
-	infilename = sys.argv[1] 
-if not os.path.isfile(infilename):
-	print "Warning: ", infilename, " does not exist."
+print "language", language
+ 
 if g_encoding == "utf8":
 	infile = codecs.open(infilename, g_encoding = 'utf-8')
 else:
 	infile = open(infilename) 
-
-
-#----------------------------------------------------------#
- 
- 
- 
 if g_encoding == "utf8":
 	print "yes utf8"
 else:
-	Signatures_outfile = open (outfile_Signatures_name, mode = 'w')
+	Signatures_outfile      = open (outfile_Signatures_name, mode = 'w')
+
 
 outfile_Signatures		= open (outfile_Signatures_name,"w")
 outfile_FSA 			= open (outfile_FSA_name,"w")
-outfile_SigExemplars 	= open (outfile_signature_exemplar_name,"w")
+outfile_SigExemplars 	        = open (outfile_signature_exemplar_name,"w")
 outfile_WordToSig		= open (outfile_WordToSig_name,"w")
-outfile_SigTransforms   = open (outfile_SigTransforms_name,"w")
-outfile_StemToWords   	= open (outfile_stemtowords_name,"w") 
-outfile_StemToWords2   	= open (outfile_stemtowords_2_name,"w") 
-outfile_WordParses   	= open (outfile_wordparses_name,"w") 
+outfile_SigTransforms           = open (outfile_SigTransforms_name,"w")
+outfile_StemToWords   	        = open (outfile_stemtowords_name,"w") 
+outfile_StemToWords2   	        = open (outfile_stemtowords_2_name,"w") 
+outfile_WordParses   	        = open (outfile_wordparses_name,"w") 
 #outfile_WordList   		= open (outfile_wordlist_name,"w") 
 outfile_WordCounts   		= open (outfile_wordcount_name,"w") 
-outfile_SigExtensions   = open (outfile_SigExtensions_name,"w") 
+outfile_SigExtensions           = open (outfile_SigExtensions_name,"w") 
 outfile_Suffixes   		= open (outfile_suffix_name,"w") 
-outfile_Rebalancing_Signatures    		= open (outfile_rebalancing_name,"w") 
+outfile_Rebalancing_Signatures  = open (outfile_rebalancing_name,"w") 
+#outfile_FSA_graphics   	= open (outfile_FSA_graphics_name,"w")  
 
-#outfile_FSA_graphics   		= open (outfile_FSA_graphics_name,"w")  
+
+
+
+
+
+
 #-------------------------------------------------------------------------------------------------------# 
 #-------------------------------------------------------------------------------------------------------#
 # 					Main part of program		   			   	#
@@ -203,7 +202,9 @@ for line in filelines:
 		break
  
 	Lexicon.WordList.AddWord(word) 
- 
+
+Lexicon.ReverseWordList =  Lexicon.WordCounts.keys()
+Lexicon.ReverseWordList.sort(key = lambda word:word[::-1])
 Lexicon.WordList.sort()
 print "\n1. Finished reading word list.\n"
 Lexicon.PrintWordCounts(outfile_WordCounts)
@@ -212,26 +213,10 @@ Lexicon.PrintWordCounts(outfile_WordCounts)
 
 print >>outfile_Signatures, "# ", language, numberofwords
 
+initialize_files1(Lexicon, lxalogfile, language)
+initialize_files1(Lexicon, "console", language)
 
-
-print >>lxalogfile, "{:40s}{:>15s}".format("Language: ", language)
-print >>lxalogfile, "{:40s}{:10,d}".format("Total words:", len(Lexicon.WordList.mylist))
-print >>lxalogfile, "{:40s}{:>10,}".format("Minimum Stem Length", Lexicon.MinimumStemLength)
-print >>lxalogfile, "{:40s}{:>10,}".format("Maximum Affix Length", Lexicon.MaximumAffixLength )
-print >>lxalogfile, "{:40s}{:>10,}".format("Minimum Number of stems in signature: ", Lexicon.MinimumStemsInaSignature)
-print >>lxalogfile, "{:40s}{:10,d}".format("Total letter count in words: ", Lexicon.TotalLetterCountInWords)
-print >>lxalogfile, "{:40s}{:10.2f}".format("Average letters per word: ", float(Lexicon.TotalLetterCountInWords)/len(Lexicon.WordList.mylist))
-
-print  "{:40s}{:>15s}".format("Language: ", language)
-print  "{:40s}{:10,d}".format("Total words:", len(Lexicon.WordList.mylist))
-print  "{:40s}{:>10,}".format("Minimum Stem Length", Lexicon.MinimumStemLength)
-print  "{:40s}{:>10,}".format("Maximum Affix Length", Lexicon.MaximumAffixLength )
-print  "{:40s}{:>10,}".format("Minimum Number of stems in signature: ", Lexicon.MinimumStemsInaSignature)
-print  "{:40s}{:10,d}".format("Total letter count in words: ", Lexicon.TotalLetterCountInWords)
-print  "{:40s}{:10.2f}".format("Average letters per word: ", float(Lexicon.TotalLetterCountInWords)/len(Lexicon.WordList.mylist))
-print 
  
-
 splitEndState = True
 morphology= FSA_lxa(splitEndState)
 
@@ -240,6 +225,9 @@ if True:
 	print "2. Make Signatures."
 	Lexicon.MakeSignatures( lxalogfile,outfile_Rebalancing_Signatures,FindSuffixesFlag,Lexicon.MinimumStemLength)
 	
+if True: 
+	print "2.1 Loose fit."
+	loose_fit(Lexicon )
  
 if True:
 	print "\n3. Printing signatures."

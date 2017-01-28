@@ -1,3 +1,13 @@
+def SortSignatureStringByLength(sig):
+        chain = sig.split('-')
+        for itemno in range(len(chain)):
+                if chain[itemno] == "NULL":
+                        chain[itemno] = ""
+        chain.sort(key = lambda item:len(item), reverse=True)
+        for itemno in range(len(chain)):
+                if chain[itemno] == "":
+                        chain[itemno] = "NULL"        
+        return chain
 
 # ----------------------------------------------------------------------------------------------------------------------------#
 def Sig1ExtendsSig2(sig1, sig2, outfile):  # for suffix signatures
