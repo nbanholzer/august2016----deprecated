@@ -208,7 +208,8 @@ Lexicon.ReverseWordList.sort(key = lambda word:word[::-1])
 Lexicon.WordList.sort()
 print "\n1. Finished reading word list.\n"
 Lexicon.PrintWordCounts(outfile_WordCounts)
-
+Lexicon.Words = Lexicon.WordCounts.keys()
+Lexicon.Words.sort()
  
 
 print >>outfile_Signatures, "# ", language, numberofwords

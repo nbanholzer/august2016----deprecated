@@ -55,6 +55,7 @@ class CWordList:
 class CLexicon:
     def __init__(self):
         self.WordList = CWordList()
+        self.Words = list()
         self.WordCounts = dict()
         self.ReverseWordList = list()
         #self.Signatures = {}        #not currently used...
